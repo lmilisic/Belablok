@@ -1,37 +1,23 @@
 package com.mioc.belablok;
 
-import static com.mioc.belablok.MainActivity.load;
-
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.media.Image;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
+import com.google.gson.Gson;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 public class VelikePartijeAdapter extends RecyclerView.Adapter<VelikePartijeAdapter.ViewHolder> {
 
@@ -45,6 +31,28 @@ public class VelikePartijeAdapter extends RecyclerView.Adapter<VelikePartijeAdap
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    public String[] dobi_sumu(String i) {
+        String rezultat = i;
+        rezultat = rezultat.substring(6, rezultat.length());
+        byte[] decodedBytes = Base64.getDecoder().decode(rezultat);
+        String decodedString = new String(decodedBytes);
+        String igre1 = decodedString.split("<string name=\"Igre\">")[1].split("</string>")[0];
+        ArrayList<String> lista = new ArrayList<String>(Arrays.asList(TextUtils.split(igre1, "‚‗‚")));
+        Gson gson = new Gson();
+        ArrayList<String> objStrings = lista;
+        ArrayList<Igre> objects =  new ArrayList<Igre>();
+        for(String jObjString : objStrings){
+            Object value  = gson.fromJson(jObjString,  Igre.class);
+            objects.add((Igre) value);
+        }
+        Integer mi_suma = 0;
+        Integer vi_suma = 0;
+        for(Igre igraupartiji : objects){
+            mi_suma += Integer.parseInt(igraupartiji.getMi_suma());
+            vi_suma += Integer.parseInt(igraupartiji.getVi_suma());
+        }
+        return new String[] {String.valueOf(mi_suma), String.valueOf(vi_suma)};
     }
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView textView_mi;
@@ -109,6 +117,23 @@ public class VelikePartijeAdapter extends RecyclerView.Adapter<VelikePartijeAdap
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
+        String[] rezultati = dobi_sumu(localDataSet.get(position).igra);
+        if (Integer.parseInt(rezultati[0])>Integer.parseInt(rezultati[1])){
+            viewHolder.migetTextView().setTextColor(Color.parseColor("#2196F3"));
+            viewHolder.vigetTextView().setTextColor(Color.parseColor("#000000"));
+        }
+        if (Integer.parseInt(rezultati[0])<Integer.parseInt(rezultati[1])){
+            viewHolder.migetTextView().setTextColor(Color.parseColor("#000000"));
+            viewHolder.vigetTextView().setTextColor(Color.parseColor("#F42414"));
+        }
+        if (Integer.parseInt(rezultati[0])==Integer.parseInt(rezultati[1])){
+            viewHolder.migetTextView().setTextColor(Color.parseColor("#000000"));
+            viewHolder.vigetTextView().setTextColor(Color.parseColor("#000000"));
+        }
+        viewHolder.migetTextView().setText(rezultati[0]);
+        viewHolder.vigetTextView().setText(rezultati[1]);
+        viewHolder.mimalogetTextView().setTextColor(Color.parseColor("#2196F3"));
+        viewHolder.vimalogetTextView().setTextColor(Color.parseColor("#F42414"));
         viewHolder.mimalogetTextView().setText(localDataSet.get(position).mi_pobjede);
         viewHolder.vimalogetTextView().setText(localDataSet.get(position).vi_pobjede);
         viewHolder.krajgetTextView().setText(localDataSet.get(position).kraj);

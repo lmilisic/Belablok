@@ -34,6 +34,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 
@@ -46,6 +47,7 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.google.gson.Gson;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
@@ -76,6 +78,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -119,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
             Boolean[] new_pali = prev.getPali().clone();
             Boolean[] new_zvali = prev.getZvali().clone();
             new_zvali[1] = !new_zvali[1];
-            Boolean[] new_stiglja = prev.getZvali().clone();
+            Boolean[] new_stiglja = prev.getStiglja().clone();
             new_stiglja[1] = !new_stiglja[1];
             igre.add(new Igre(new_pali,
                     new_zvali,
@@ -159,16 +162,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Bundle extras = getIntent().getExtras();
         newString = extras.getInt(Intent.EXTRA_TEXT);
-        if (newString!=null){
-            String rezultat = VelikePartijeAdapter.localDataSet.get(newString).igra;
-            rezultat = rezultat.substring(6, rezultat.length());
-            byte[] decodedBytes = Base64.getDecoder().decode(rezultat);
-            String decodedString = new String(decodedBytes);
-            if (String.valueOf(VelikePartijeAdapter.localDataSet.get(newString).igra).startsWith("belot!")){
-                WriteToFile("/data/data/com.mioc.belablok/shared_prefs/com.mioc.belablok_preferences.xml", decodedString);
-                WriteToFile("/data/user/0/com.mioc.belablok/shared_prefs/com.mioc.belablok_preferences.xml", decodedString);
-            }
-        }
+        Log.e("TAG", "onCreate: "+String.valueOf(newString));
         final String PREFS_NAME = "MyPrefsFile";
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         if (settings.getBoolean("my_first_time", true)) {
@@ -176,13 +170,12 @@ public class MainActivity extends AppCompatActivity {
             save(new ArrayList<Igre>(), false, false, 0, -1, 1001, 0, 0);
             settings.edit().putBoolean("my_first_time", false).commit();
         }
-
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         getSupportActionBar().setElevation(0);
         getSupportActionBar().setTitle("");
-
     }
+
     public static class ParameterStringBuilder {
         public static String getParamsString(Map<String, String> params)
                 throws UnsupportedEncodingException {
@@ -316,6 +309,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed()
     {
+        Game_chooser.adapter.notifyItemChanged(newString);
         finish();
     }
     @Override

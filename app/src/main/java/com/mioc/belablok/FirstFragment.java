@@ -3,6 +3,7 @@ package com.mioc.belablok;
 import static android.content.ContentValues.TAG;
 import static android.content.Context.MIDI_SERVICE;
 import static com.google.android.material.badge.BadgeUtils.attachBadgeDrawable;
+import static com.mioc.belablok.MainActivity.newString;
 import static com.mioc.belablok.MainActivity.save;
 
 import android.annotation.SuppressLint;
@@ -13,6 +14,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ScaleDrawable;
 import android.os.Bundle;
 import android.provider.Telephony;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,6 +32,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.badge.BadgeDrawable;
+import com.google.gson.Gson;
 import com.mioc.belablok.databinding.FragmentFirstBinding;
 
 import java.io.BufferedReader;
@@ -41,6 +44,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
@@ -85,26 +89,25 @@ public class FirstFragment extends Fragment {
 
     public static String shared_prefs(){
         String contents = "";
-        FileInputStream fis = null;
-        try {
-            fis = new FileInputStream("/data/user/0/com.mioc.belablok/shared_prefs/com.mioc.belablok_preferences.xml");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        Gson gson = new Gson();
+        ArrayList<String> objStrings = new ArrayList<String>();
+        for(Object obj : igre){
+            objStrings.add(gson.toJson(obj));
         }
-        InputStreamReader inputStreamReader =
-                new InputStreamReader(fis, StandardCharsets.UTF_8);
-        StringBuilder stringBuilder = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(inputStreamReader)) {
-            String line = reader.readLine();
-            while (line != null) {
-                stringBuilder.append(line).append('\n');
-                line = reader.readLine();
-            }
-        } catch (IOException e) {
-        } finally {
-            contents = stringBuilder.toString();
-            Log.d("TAG", contents);
-        }
+        String[] myStringList = objStrings.toArray(new String[objStrings.size()]);
+        String igra = TextUtils.join("‚‗‚", myStringList);
+        contents = "<?xml version='1.0' encoding='utf-8' standalone='yes' ?> \n" +
+                "<map> \n" +
+                "    <int name=\"dijeli\" value=\""+String.valueOf(dijeli)+"\" /> \n" +
+                "    <boolean name=\"pobjedaa\" value=\""+String.valueOf(pobjedaa)+"\" /> \n" +
+                "    <int name=\"kraj\" value=\""+String.valueOf(kraj)+"\" /> \n" +
+                "    <string name=\"Igre\">"+igra+"</string>\n" +
+                "    <int name=\"pobjede_mi\" value=\""+String.valueOf(pobjede_mi)+"\" />\n" +
+                "    <int name=\"pobjede_vi\" value=\""+String.valueOf(pobjede_vi)+"\" />\n" +
+                "    <boolean name=\"pobjednik\" value=\""+String.valueOf(pobjednik)+"\" />\n" +
+                "    <int name=\"dijeli_prosli\" value=\""+String.valueOf(dijeli_prosli)+"\" />\n" +
+                "</map>\n";
+        Log.d("TAG1111", "shared_prefs: "+contents);
         return contents;
     }
 
@@ -218,7 +221,14 @@ public class FirstFragment extends Fragment {
                 return true;
             }
         });
-
+        if (MainActivity.newString!=null){
+            String rezultat = Game_chooser.adapter.localDataSet.get(MainActivity.newString).igra;
+            rezultat = rezultat.substring(6, rezultat.length());
+            byte[] decodedBytes = Base64.getDecoder().decode(rezultat);
+            String decodedString = new String(decodedBytes);
+            Log.d("TAG11111111111111111", "onCreate: "+rezultat);
+            uvezi(decodedString);
+        }
         Resume();
     }
     Integer last = 0;
@@ -228,7 +238,27 @@ public class FirstFragment extends Fragment {
         super.onResume();
         Resume();
     }
-
+    public void uvezi(String i) {
+        String decodedString = i;
+        String igre1 = decodedString.split("<string name=\"Igre\">")[1].split("</string>")[0];
+        ArrayList<String> lista = new ArrayList<String>(Arrays.asList(TextUtils.split(igre1, "‚‗‚")));
+        Gson gson = new Gson();
+        ArrayList<String> objStrings = lista;
+        ArrayList<Igre> objects =  new ArrayList<Igre>();
+        for(String jObjString : objStrings){
+            Object value  = gson.fromJson(jObjString,  Igre.class);
+            objects.add((Igre) value);
+        }
+        igre = objects;
+        pobjede_mi = Integer.valueOf(decodedString.split("\"pobjede_mi\" value=\"")[1].split("\"")[0]);
+        pobjede_vi = Integer.valueOf(decodedString.split("\"pobjede_vi\" value=\"")[1].split("\"")[0]);
+        kraj = Integer.valueOf(decodedString.split("\"kraj\" value=\"")[1].split("\"")[0]);
+        pobjedaa = Boolean.valueOf(decodedString.split("\"pobjedaa\" value=\"")[1].split("\"")[0]);
+        pobjednik = Boolean.valueOf(decodedString.split("\"pobjednik\" value=\"")[1].split("\"")[0]);
+        dijeli = Integer.valueOf(decodedString.split("\"dijeli\" value=\"")[1].split("\"")[0]);
+        dijeli_prosli = Integer.valueOf(decodedString.split("\"dijeli_prosli\" value=\"")[1].split("\"")[0]);
+        save(igre, pobjedaa, pobjednik, dijeli_prosli, dijeli, kraj, pobjede_mi, pobjede_vi);
+    }
     @SuppressLint({"CommitPrefEdits", "NotifyDataSetChanged"})
     public static void Resume(){
         save(igre, pobjedaa, pobjednik, dijeli_prosli, dijeli, kraj, pobjede_mi, pobjede_vi);
@@ -240,14 +270,14 @@ public class FirstFragment extends Fragment {
         qr = Base64.getEncoder().encodeToString(shared_prefs().getBytes());
         Log.d("TAG111", "Resume: "+MainActivity.newString);
         if (MainActivity.newString!=null){
-            VelikePartijeAdapter.localDataSet.set(MainActivity.newString, new Partije("belot!"+qr));
+            Game_chooser.adapter.localDataSet.set(MainActivity.newString, new Partije("belot!"+qr));
             String partije_edit = "";
-            for (Partije partija : VelikePartijeAdapter.localDataSet){
+            for (Partije partija : Game_chooser.adapter.localDataSet){
                 partije_edit += "|"+partija.igra;
             }
             Log.d("TAG", "Resume: "+partije_edit);
-            Game_chooser.partije.edit().putString("games", partije_edit);
-            Game_chooser.adapter.notifyDataSetChanged();
+            Game_chooser.writeToFile(partije_edit, recyclerView.getContext());
+            Game_chooser.adapter.notifyItemChanged(MainActivity.newString);
         }
         for (int i = 0; i < IgraAdapter.localDataSet.size(); i++) {
             zbroj_mi += Integer.parseInt(IgraAdapter.localDataSet.get(i).mi_suma);
@@ -398,6 +428,17 @@ public class FirstFragment extends Fragment {
         if (dijeli==2){djelitelj.setImageResource(R.mipmap.selected_2);}
         if (dijeli==3){djelitelj.setImageResource(R.mipmap.selected_3);}
         recyclerView.scrollToPosition(igre.size() - 1);
+        qr = Base64.getEncoder().encodeToString(shared_prefs().getBytes());
+        if (MainActivity.newString!=null){
+            Game_chooser.adapter.localDataSet.set(MainActivity.newString, new Partije("belot!"+qr));
+            String partije_edit = "";
+            for (Partije partija : Game_chooser.adapter.localDataSet){
+                partije_edit += "|"+partija.igra;
+            }
+            Log.d("TAG", "Resume: "+partije_edit);
+            Game_chooser.writeToFile(partije_edit, recyclerView.getContext());
+            Game_chooser.adapter.notifyItemChanged(MainActivity.newString);
+        }
     }
     @Override
     public void onDestroyView() {
