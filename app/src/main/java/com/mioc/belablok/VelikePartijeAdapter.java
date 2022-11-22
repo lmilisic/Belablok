@@ -63,15 +63,43 @@ public class VelikePartijeAdapter extends RecyclerView.Adapter<VelikePartijeAdap
 
         public ViewHolder(View view) {
             super(view);
+            view.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    Integer position1 = getItemCount1()-1-getAdapterPosition();
+                    ArrayList<Partije> dataSet = new ArrayList<Partije>();
+                    String igre = Game_chooser.readFromFile(view.getContext());
+                    String igrenovo = "";
+                    Integer j = 0;
+                    for (String i : igre.split("\\|")) {
+                        boolean b = !(i.trim().length() <= 1);
+                        if (b) {
+                            if (!(j.equals(position1))){
+                                igrenovo += "|"+i;
+                                dataSet.add(new Partije(i));
+                            }
+                            j++;
+                        }
+
+                    }
+                    localDataSet = dataSet;
+                    Game_chooser.dataSet = dataSet;
+                    Game_chooser.adapter.notifyItemRemoved(getAdapterPosition());
+                    Game_chooser.writeToFile(igrenovo, view.getContext());
+                    return true;
+                }
+            });
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    Integer position1 = getItemCount1()-1-getAdapterPosition();
                     Intent intent = new Intent();
                     intent.setClass(view.getContext(), MainActivity.class);
-                    intent.putExtra(Intent.EXTRA_TEXT, getAdapterPosition());
+                    intent.putExtra(Intent.EXTRA_TEXT, position1);
                     view.getContext().startActivity(intent);
                 }
             });
+
 
             textView_mi = (TextView) view.findViewById(R.id.partija_mi);
             textView_vi = (TextView) view.findViewById(R.id.partija_vi);
@@ -117,7 +145,8 @@ public class VelikePartijeAdapter extends RecyclerView.Adapter<VelikePartijeAdap
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
-        String[] rezultati = dobi_sumu(localDataSet.get(position).igra);
+        Integer position1 = getItemCount()-1-position;
+        String[] rezultati = dobi_sumu(localDataSet.get(position1).igra);
         if (Integer.parseInt(rezultati[0])>Integer.parseInt(rezultati[1])){
             viewHolder.migetTextView().setTextColor(Color.parseColor("#2196F3"));
             viewHolder.vigetTextView().setTextColor(Color.parseColor("#000000"));
@@ -134,12 +163,18 @@ public class VelikePartijeAdapter extends RecyclerView.Adapter<VelikePartijeAdap
         viewHolder.vigetTextView().setText(rezultati[1]);
         viewHolder.mimalogetTextView().setTextColor(Color.parseColor("#2196F3"));
         viewHolder.vimalogetTextView().setTextColor(Color.parseColor("#F42414"));
-        viewHolder.mimalogetTextView().setText(localDataSet.get(position).mi_pobjede);
-        viewHolder.vimalogetTextView().setText(localDataSet.get(position).vi_pobjede);
-        viewHolder.krajgetTextView().setText(localDataSet.get(position).kraj);
+        viewHolder.mimalogetTextView().setText(localDataSet.get(position1).mi_pobjede);
+        viewHolder.vimalogetTextView().setText(localDataSet.get(position1).vi_pobjede);
+        viewHolder.krajgetTextView().setText(localDataSet.get(position1).kraj);
     }
 
     // Return the size of your dataset (invoked by the layout manager)
+    public static int getItemCount1() {
+        if (localDataSet!=null){
+            return localDataSet.size();
+        }
+        return 0;
+    }
     @Override
     public int getItemCount() {
         if (localDataSet!=null){

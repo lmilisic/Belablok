@@ -21,7 +21,7 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
 public class Game_chooser extends AppCompatActivity {
-    ArrayList<Partije> dataSet = new ArrayList<Partije>();
+    static ArrayList<Partije> dataSet = new ArrayList<Partije>();
     static SharedPreferences partije;
     static VelikePartijeAdapter adapter;
     @Override
@@ -91,7 +91,7 @@ public class Game_chooser extends AppCompatActivity {
             Log.e("Exception", "File write failed: " + e.toString());
         }
     }
-    private String readFromFile(Context context) {
+    public static String readFromFile(Context context) {
 
         String ret = "";
 
