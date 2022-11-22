@@ -6,5 +6,13 @@
     <item
         android:id="@+id/izbrisi"
         android:title="Izbriši igre" />
-
+    <item
+        android:id="@+id/export_game"
+        android:title="Izvezi igru u QR" />
+    <item
+        android:id="@+id/import_game"
+        android:title="Uvezi igru uz QR" />
+    <item
+        android:id="@+id/switch_team"
+        android:title="Promijeni ekipe" />
 </menu>

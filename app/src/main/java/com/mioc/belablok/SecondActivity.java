@@ -322,12 +322,14 @@ public class SecondActivity extends AppCompatActivity {
         if (stiglja[0]){
             if (!stiglja[1]){
                 mi_zvanja_int_priznato = mi_zvanja_int+vi_zvanja_int+90;
+                mi_zvanja_int += 90;
                 vi_zvanja_int_priznato = 0;
                 mi_bodovi.setText("162");
                 vi_bodovi.setText("0");
             }
             if (stiglja[1]){
                 vi_zvanja_int_priznato = mi_zvanja_int+vi_zvanja_int+90;
+                vi_zvanja_int += 90;
                 mi_zvanja_int_priznato = 0;
                 vi_bodovi.setText("162");
                 mi_bodovi.setText("0");
@@ -946,6 +948,7 @@ public class SecondActivity extends AppCompatActivity {
                         vi_bodovi.setText(number);
                         mi_bodovi.setText(String.valueOf(162 - number_int));
                     }
+                    stiglja[0] = false;
                 }
                 else if (!number.equals("x") && !number.equals("zvanje20") && !number.equals("zvanje50") && !number.equals("zvanje100") && !number.equals("zvanje150") && !number.equals("zvanje200") && !number.equals("stiglja")) {
                     if (fokus[0] == 0) {
@@ -966,6 +969,7 @@ public class SecondActivity extends AppCompatActivity {
                         vi_bodovi.setText(String.valueOf(number_int));
                         mi_bodovi.setText(String.valueOf(162 - number_int));
                     }
+                    stiglja[0] = false;
                 }
                 else if (!number.equals("zvanje20") && !number.equals("zvanje50") && !number.equals("zvanje100") && !number.equals("zvanje150") && !number.equals("zvanje200") && !number.equals("stiglja")) {
                     vi_bodovi.setText(String.valueOf(0));

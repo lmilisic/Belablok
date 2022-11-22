@@ -21,6 +21,28 @@ public class Igre {
     String mi_suma;
     String vi_suma;
 
+    public Igre(Boolean[] new_pali, Boolean[] new_zvali, Boolean[] new_stiglja, Integer broj_zvanje_20_mi, Integer broj_zvanje_20_vi, Integer broj_zvanje_50_mi, Integer broj_zvanje_50_vi, Integer broj_zvanje_100_mi, Integer broj_zvanje_100_vi, Integer broj_zvanje_150_mi, Integer broj_zvanje_150_vi, Integer broj_zvanje_200_mi, Integer broj_zvanje_200_vi, String mi_zvanje, String vi_zvanje, String mi_bodovi, String vi_bodovi, String mi_suma, String vi_suma) {
+        this.pali = new_pali;
+        this.zvali = new_zvali;
+        this.stiglja = new_stiglja;
+        this.broj_zvanje_20_mi = broj_zvanje_20_mi;
+        this.broj_zvanje_20_vi = broj_zvanje_20_vi;
+        this.broj_zvanje_50_mi = broj_zvanje_50_mi;
+        this.broj_zvanje_50_vi = broj_zvanje_50_vi;
+        this.broj_zvanje_100_mi = broj_zvanje_100_mi;
+        this.broj_zvanje_100_vi = broj_zvanje_100_vi;
+        this.broj_zvanje_150_mi = broj_zvanje_150_mi;
+        this.broj_zvanje_150_vi = broj_zvanje_150_vi;
+        this.broj_zvanje_200_mi = broj_zvanje_200_mi;
+        this.broj_zvanje_200_vi = broj_zvanje_200_vi;
+        this.mi_zvanje = mi_zvanje;
+        this.vi_zvanje = vi_zvanje;
+        this.mi_bodovi = mi_bodovi;
+        this.vi_bodovi = vi_bodovi;
+        this.mi_suma = mi_suma;
+        this.vi_suma = vi_suma;
+    }
+
     public Boolean[] getPali() {
         return pali;
     }

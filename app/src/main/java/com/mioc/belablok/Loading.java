@@ -17,7 +17,7 @@ public class Loading extends AppCompatActivity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                Intent myIntent = new Intent(Loading.this, MainActivity.class);
+                Intent myIntent = new Intent(Loading.this, Game_chooser.class);
                 Loading.this.startActivity(myIntent);
             }
         }, 1000);

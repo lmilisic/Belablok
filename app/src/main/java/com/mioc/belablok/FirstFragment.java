@@ -1,5 +1,7 @@
 package com.mioc.belablok;
 
+import static android.content.ContentValues.TAG;
+import static android.content.Context.MIDI_SERVICE;
 import static com.google.android.material.badge.BadgeUtils.attachBadgeDrawable;
 import static com.mioc.belablok.MainActivity.save;
 
@@ -10,6 +12,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ScaleDrawable;
 import android.os.Bundle;
+import android.provider.Telephony;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,10 +32,19 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.badge.BadgeDrawable;
 import com.mioc.belablok.databinding.FragmentFirstBinding;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
+import java.util.zip.GZIPOutputStream;
 
 public class FirstFragment extends Fragment {
 
@@ -60,7 +72,8 @@ public class FirstFragment extends Fragment {
     Button ponisti;
     static ScrollView sv;
     static ImageView djelitelj;
-
+    static ImageView imageView4;
+    static String qr = "";
 
     static Boolean pobjedaa = false;
     public static Boolean pobjednik = false;
@@ -70,7 +83,30 @@ public class FirstFragment extends Fragment {
     public static Integer pobjede_mi = 0;
     public static Integer pobjede_vi = 0;
 
-
+    public static String shared_prefs(){
+        String contents = "";
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream("/data/user/0/com.mioc.belablok/shared_prefs/com.mioc.belablok_preferences.xml");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        InputStreamReader inputStreamReader =
+                new InputStreamReader(fis, StandardCharsets.UTF_8);
+        StringBuilder stringBuilder = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(inputStreamReader)) {
+            String line = reader.readLine();
+            while (line != null) {
+                stringBuilder.append(line).append('\n');
+                line = reader.readLine();
+            }
+        } catch (IOException e) {
+        } finally {
+            contents = stringBuilder.toString();
+            Log.d("TAG", contents);
+        }
+        return contents;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -108,6 +144,7 @@ public class FirstFragment extends Fragment {
         vi_sve_pali = view.findViewById(R.id.textView6);
         ponisti = view.findViewById(R.id.button24);
         djelitelj = view.findViewById(R.id.imageView2);
+        imageView4 = view.findViewById(R.id.imageView4);
         mi.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -181,6 +218,7 @@ public class FirstFragment extends Fragment {
                 return true;
             }
         });
+
         Resume();
     }
     Integer last = 0;
@@ -190,6 +228,8 @@ public class FirstFragment extends Fragment {
         super.onResume();
         Resume();
     }
+
+    @SuppressLint({"CommitPrefEdits", "NotifyDataSetChanged"})
     public static void Resume(){
         save(igre, pobjedaa, pobjednik, dijeli_prosli, dijeli, kraj, pobjede_mi, pobjede_vi);
         Log.d("aaa", "resume");
@@ -197,6 +237,18 @@ public class FirstFragment extends Fragment {
         IgraAdapter.localDataSet = igre;
         Integer zbroj_mi = 0;
         Integer zbroj_vi = 0;
+        qr = Base64.getEncoder().encodeToString(shared_prefs().getBytes());
+        Log.d("TAG111", "Resume: "+MainActivity.newString);
+        if (MainActivity.newString!=null){
+            VelikePartijeAdapter.localDataSet.set(MainActivity.newString, new Partije("belot!"+qr));
+            String partije_edit = "";
+            for (Partije partija : VelikePartijeAdapter.localDataSet){
+                partije_edit += "|"+partija.igra;
+            }
+            Log.d("TAG", "Resume: "+partije_edit);
+            Game_chooser.partije.edit().putString("games", partije_edit);
+            Game_chooser.adapter.notifyDataSetChanged();
+        }
         for (int i = 0; i < IgraAdapter.localDataSet.size(); i++) {
             zbroj_mi += Integer.parseInt(IgraAdapter.localDataSet.get(i).mi_suma);
             zbroj_vi += Integer.parseInt(IgraAdapter.localDataSet.get(i).vi_suma);
