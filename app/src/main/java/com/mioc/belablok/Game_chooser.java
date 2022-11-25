@@ -1,13 +1,19 @@
 package com.mioc.belablok;
 
+import static com.mioc.belablok.App.getContext;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -24,11 +30,24 @@ public class Game_chooser extends AppCompatActivity {
     static ArrayList<Partije> dataSet = new ArrayList<Partije>();
     static SharedPreferences partije;
     static VelikePartijeAdapter adapter;
+    public static int color_text;
+    public static int color_text1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_chooser);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.rv1);
+        TypedValue typedValue = new TypedValue();
+        Resources.Theme theme = recyclerView.getContext().getTheme();
+        theme.resolveAttribute(android.R.attr.textColorPrimary, typedValue, true);
+        int color = ContextCompat.getColor(recyclerView.getContext(), typedValue.resourceId);
+        color_text = Color.parseColor("#"+Integer.toHexString(color).substring(2));
+        TypedValue typedValue1 = new TypedValue();
+        Resources.Theme theme1 = recyclerView.getContext().getTheme();
+        theme1.resolveAttribute(android.R.attr.textColorPrimaryInverse, typedValue1, true);
+        int color1 = ContextCompat.getColor(recyclerView.getContext(), typedValue1.resourceId);
+        color_text1 = Color.parseColor("#"+Integer.toHexString(color1).substring(2));
+        Log.d("color_text1", String.valueOf(color_text1));
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);

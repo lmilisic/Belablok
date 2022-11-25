@@ -3,6 +3,10 @@ package com.mioc.belablok;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static androidx.core.graphics.TypefaceCompatUtil.getTempFile;
 import static com.mioc.belablok.FirstFragment.igradapter;
+import static com.mioc.belablok.Game_chooser.adapter;
+import static com.mioc.belablok.Game_chooser.dataSet;
+import static com.mioc.belablok.Game_chooser.readFromFile;
+import static com.mioc.belablok.Game_chooser.writeToFile;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -236,42 +240,59 @@ public class MainActivity extends AppCompatActivity {
                             out.close();
                             int status = con.getResponseCode();
                             Log.d("TAG", "run: "+String.valueOf(status));
-                            BufferedReader in = new BufferedReader(
-                                    new InputStreamReader(con.getInputStream()));
-                            String inputLine;
-                            StringBuffer content = new StringBuffer();
-                            while ((inputLine = in.readLine()) != null) {
-                                content.append(inputLine);
-                            }
-                            in.close();
-                            con.disconnect();
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    try{
-                                        BitMatrix mMatrix = mWriter.encode("belot!"+String.valueOf(content), BarcodeFormat.QR_CODE, 1000,1000);
-                                        BarcodeEncoder mEncoder = new BarcodeEncoder();
-                                        Bitmap mBitmap = mEncoder.createBitmap(mMatrix);
-                                        imageCode.setImageBitmap(mBitmap);
-                                        imageCode.setVisibility(View.VISIBLE);
-                                    } catch(Exception exception){
-                                        Log.e("TAG", "onOptionsItemSelected: ", exception);
-                                        Context context = getApplicationContext();
-                                        CharSequence text = "An error occurred while uploading/displaying! Try again.";
-                                        int duration = Toast.LENGTH_LONG;
-                                        Toast toast = Toast.makeText(context, text, duration);
-                                        toast.show();
-                                    }
+                            if (String.valueOf(status).equals("200")) {
+                                BufferedReader in = new BufferedReader(
+                                        new InputStreamReader(con.getInputStream()));
+                                String inputLine;
+                                StringBuffer content = new StringBuffer();
+                                while ((inputLine = in.readLine()) != null) {
+                                    content.append(inputLine);
                                 }
-                            });
+                                in.close();
+                                con.disconnect();
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            BitMatrix mMatrix = mWriter.encode("belot!" + String.valueOf(content), BarcodeFormat.QR_CODE, 1000, 1000);
+                                            BarcodeEncoder mEncoder = new BarcodeEncoder();
+                                            Bitmap mBitmap = mEncoder.createBitmap(mMatrix);
+                                            imageCode.setImageBitmap(mBitmap);
+                                            imageCode.setVisibility(View.VISIBLE);
+                                        } catch (Exception exception) {
+                                            Log.e("TAG", "onOptionsItemSelected: ", exception);
+                                            Context context = getApplicationContext();
+                                            CharSequence text = "An error occurred while uploading/displaying! Try again.";
+                                            int duration = Toast.LENGTH_LONG;
+                                            runOnUiThread(new Runnable() {
+                                                public void run() {
+                                                    Toast.makeText(context, text, duration).show();
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                            }else{
+                                Context context = getApplicationContext();
+                                CharSequence text = "Check your internet connection!";
+                                int duration = Toast.LENGTH_LONG;
+                                runOnUiThread(new Runnable() {
+                                    public void run() {
+                                        Toast.makeText(context, text, duration).show();
+                                    }
+                                });
+                            }
                         }
                         catch(Exception exception){
                             Log.e("TAG", "onOptionsItemSelected: ", exception);
                             Context context = getApplicationContext();
-                            CharSequence text = "Data too long! Internet connection required!";
+                            CharSequence text = "Check your internet connection! Data may be too long!";
                             int duration = Toast.LENGTH_LONG;
-                            Toast toast = Toast.makeText(context, text, duration);
-                            toast.show();
+                            runOnUiThread(new Runnable() {
+                                public void run() {
+                                    Toast.makeText(context, text, duration).show();
+                                }
+                            });
                         }
                     }
                 }).start();
@@ -309,7 +330,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed()
     {
-        Game_chooser.adapter.notifyItemChanged(newString);
+        adapter.notifyItemChanged(newString);
         finish();
     }
     @Override
@@ -339,40 +360,61 @@ public class MainActivity extends AppCompatActivity {
                                 out.close();
                                 int status = con.getResponseCode();
                                 Log.d("TAG", "run: "+String.valueOf(status));
-                                BufferedReader in = new BufferedReader(
-                                        new InputStreamReader(con.getInputStream()));
-                                String inputLine;
-                                StringBuffer content = new StringBuffer();
-                                while ((inputLine = in.readLine()) != null) {
-                                    content.append(inputLine);
-                                }
-                                in.close();
-                                con.disconnect();
-                                String rezultat = String.valueOf(content);
-                                rezultat = rezultat.substring(6, rezultat.length());
-                                byte[] decodedBytes = Base64.getDecoder().decode(rezultat);
-                                String decodedString = new String(decodedBytes);
-                                if (String.valueOf(content).startsWith("belot!")){
-                                    WriteToFile("/data/data/com.mioc.belablok/shared_prefs/com.mioc.belablok_preferences.xml", decodedString);
-                                    WriteToFile("/data/user/0/com.mioc.belablok/shared_prefs/com.mioc.belablok_preferences.xml", decodedString);
-                                    tinydb = new TinyDB(App.getContext());
-                                    load();
+                                if (String.valueOf(status).equals("200")){
+                                    BufferedReader in = new BufferedReader(
+                                            new InputStreamReader(con.getInputStream()));
+                                    String inputLine;
+                                    StringBuffer content = new StringBuffer();
+                                    while ((inputLine = in.readLine()) != null) {
+                                        content.append(inputLine);
+                                    }
+                                    in.close();
+                                    con.disconnect();
+                                    String rezultat = String.valueOf(content);
+                                    if (rezultat.startsWith("belot!")){
+                                        String igre = readFromFile(getApplicationContext());
+                                        writeToFile(igre + "|" + rezultat, getApplicationContext());
+                                        igre = readFromFile(getApplicationContext());
+                                        dataSet = new ArrayList<Partije>();
+                                        for (String i : igre.split("\\|")) {
+                                            boolean b = !(i.trim().length() <= 1);
+                                            if (b) {
+                                                dataSet.add(new Partije(i));
+                                            }
+                                        }
+                                        runOnUiThread(new Runnable() {
+                                            public void run() {
+                                                adapter.localDataSet = dataSet;
+                                                adapter.notifyDataSetChanged();
+                                                Context context = getApplicationContext();
+                                                CharSequence text = "Game added!";
+                                                int duration = Toast.LENGTH_LONG;
+                                                Toast.makeText(context, text, duration).show();
+                                                finish();
+                                            }
+                                        });
+                                    }
+                                }else{
                                     Context context = getApplicationContext();
-                                    Intent mStartActivity = new Intent(context, Loading.class);
-                                    int mPendingIntentId = 123456;
-                                    PendingIntent mPendingIntent = PendingIntent.getActivity(context, mPendingIntentId, mStartActivity, PendingIntent.FLAG_CANCEL_CURRENT);
-                                    AlarmManager mgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-                                    mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 100, mPendingIntent);
-                                    System.exit(0);
+                                    CharSequence text = "Check your internet connection!";
+                                    int duration = Toast.LENGTH_LONG;
+                                    runOnUiThread(new Runnable() {
+                                        public void run() {
+                                            Toast.makeText(context, text, duration).show();
+                                        }
+                                    });
                                 }
                             }
                             catch(Exception exception){
                                 Log.e("TAG", "onOptionsItemSelected: ", exception);
                                 Context context = getApplicationContext();
-                                CharSequence text = "An error occurred!";
+                                CharSequence text = "An error occurred! Check your internet connection!";
                                 int duration = Toast.LENGTH_LONG;
-                                Toast toast = Toast.makeText(context, text, duration);
-                                toast.show();
+                                runOnUiThread(new Runnable() {
+                                    public void run() {
+                                        Toast.makeText(context, text, duration).show();
+                                    }
+                                });
                             }
                         }
                     }).start();
@@ -382,15 +424,4 @@ public class MainActivity extends AppCompatActivity {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
-    public void WriteToFile(String fileName, String content){
-        try{
-            FileOutputStream writer = new FileOutputStream(fileName);
-            writer.write(content.getBytes());
-            writer.close();
-            Log.e("TAG", "Wrote to file: "+fileName);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
 }

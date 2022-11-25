@@ -5,6 +5,7 @@ import static com.mioc.belablok.FirstFragment.igradapter;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -89,6 +90,8 @@ public class SecondActivity extends AppCompatActivity {
     Boolean dosao_iz_pobjede;
     Double scaleh;
     Double scalew;
+    static int color_text;
+    static int color_text1;
 
     private int dp_to_px(int dp){
         float dip = dp;
@@ -100,12 +103,13 @@ public class SecondActivity extends AppCompatActivity {
         );
         return (int) px;
     }
-    @SuppressLint("UnsafeOptInUsageError")
+    @SuppressLint({"UnsafeOptInUsageError", "Range"})
     private BadgeDrawable setbadge(Button button, Integer number, Boolean vis, String color, Integer gravity){
         BadgeDrawable badgeDrawable = BadgeDrawable.create(SecondActivity.this);
         badgeDrawable.setNumber(number);
         badgeDrawable.setVisible(vis);
         badgeDrawable.setBackgroundColor(Color.parseColor(color));
+        badgeDrawable.setBadgeTextColor(Color.parseColor("#FFFFFF"));
         badgeDrawable.setBadgeGravity(gravity);
         attachBadgeDrawable(badgeDrawable, button);
         return badgeDrawable;
@@ -205,10 +209,10 @@ public class SecondActivity extends AppCompatActivity {
                     if (zvali[0]) {
                         if(!zvali[1]){
                             mi_zvali.setBackgroundColor(Color.parseColor("#2196F3"));
-                            vi_zvali.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                            vi_zvali.setBackgroundColor(color_text1);
                         }
                         else if(zvali[1]){
-                            mi_zvali.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                            mi_zvali.setBackgroundColor(color_text1);
                             vi_zvali.setBackgroundColor(Color.parseColor("#F42414"));
                         }
                     }
@@ -412,7 +416,16 @@ public class SecondActivity extends AppCompatActivity {
         devet = findViewById(R.id.button9);
         nula = findViewById(R.id.button11);
         brisanje = findViewById(R.id.button12);
-
+        TypedValue typedValue = new TypedValue();
+        Resources.Theme theme = vi_bodovi.getContext().getTheme();
+        theme.resolveAttribute(android.R.attr.textColorPrimary, typedValue, true);
+        int color = ContextCompat.getColor(vi_bodovi.getContext(), typedValue.resourceId);
+        color_text = Color.parseColor("#"+Integer.toHexString(color).substring(2));
+        TypedValue typedValue1 = new TypedValue();
+        Resources.Theme theme1 = vi_bodovi.getContext().getTheme();
+        theme1.resolveAttribute(android.R.attr.textColorPrimaryInverse, typedValue1, true);
+        int color1 = ContextCompat.getColor(vi_bodovi.getContext(), typedValue1.resourceId);
+        color_text1 = Color.parseColor("#"+Integer.toHexString(color1).substring(2));
         zvanje_20_button = findViewById(R.id.button13);
         zvanje_50_button = findViewById(R.id.button14);
         zvanje_100_button = findViewById(R.id.button15);
@@ -625,19 +638,19 @@ public class SecondActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if (!zvali[0]) {
                     mi_zvali.setBackgroundColor(Color.parseColor("#2196F3"));
-                    vi_zvali.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                    vi_zvali.setBackgroundColor(color_text1);
                     zvali[0] = true;
                     zvali[1] = false;
                 }
                 else if(zvali[0] && zvali[1]){
                     mi_zvali.setBackgroundColor(Color.parseColor("#2196F3"));
-                    vi_zvali.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                    vi_zvali.setBackgroundColor(color_text1);
                     zvali[0] = true;
                     zvali[1] = false;
                 }
                 else if(zvali[0] && !zvali[1]){
-                    mi_zvali.setBackgroundColor(Color.parseColor("#FFFFFF"));
-                    vi_zvali.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                    mi_zvali.setBackgroundColor(color_text1);
+                    vi_zvali.setBackgroundColor(color_text1);
                     zvali[0] = false;
                     zvali[1] = false;
                 }
@@ -648,20 +661,20 @@ public class SecondActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (!zvali[0]) {
-                    mi_zvali.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                    mi_zvali.setBackgroundColor(color_text1);
                     vi_zvali.setBackgroundColor(Color.parseColor("#F42414"));
                     zvali[0] = true;
                     zvali[1] = true;
                 }
                 else if(zvali[0] && !zvali[1]){
-                    mi_zvali.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                    mi_zvali.setBackgroundColor(color_text1);
                     vi_zvali.setBackgroundColor(Color.parseColor("#F42414"));
                     zvali[0] = true;
                     zvali[1] = true;
                 }
                 else if(zvali[0] && zvali[1]){
-                    mi_zvali.setBackgroundColor(Color.parseColor("#FFFFFF"));
-                    vi_zvali.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                    mi_zvali.setBackgroundColor(color_text1);
+                    vi_zvali.setBackgroundColor(color_text1);
                     zvali[0] = false;
                     zvali[1] = false;
                 }
@@ -1153,7 +1166,7 @@ public class SecondActivity extends AppCompatActivity {
                 else if (number.equals("stiglja")){
                     if (stiglja[0]){
                         stiglja[0] = false;
-                        stiglja_button.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                        stiglja_button.setBackgroundColor(color_text1);
                     }
                     else if (!stiglja[0]){
                         if (fokus[0] == 0) {
@@ -1174,7 +1187,7 @@ public class SecondActivity extends AppCompatActivity {
 
                 }
                 if (!stiglja[0]){
-                    stiglja_button.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                    stiglja_button.setBackgroundColor(color_text1);
                 }
                 izracunaj();
             }

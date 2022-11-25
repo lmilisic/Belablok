@@ -1,14 +1,17 @@
 package com.mioc.belablok;
 
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
@@ -147,17 +150,23 @@ public class VelikePartijeAdapter extends RecyclerView.Adapter<VelikePartijeAdap
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
         Integer position1 = getItemCount()-1-position;
         String[] rezultati = dobi_sumu(localDataSet.get(position1).igra);
+        TypedValue typedValue = new TypedValue();
+        Resources.Theme theme = viewHolder.migetTextView().getContext().getTheme();
+        theme.resolveAttribute(android.R.attr.textColorPrimary, typedValue, true);
+        int color = ContextCompat.getColor(viewHolder.migetTextView().getContext(), typedValue.resourceId);
+        int color_text = Color.parseColor("#"+Integer.toHexString(color).substring(2));
+        //Log.d("color_text", String.valueOf(color_text));
         if (Integer.parseInt(rezultati[0])>Integer.parseInt(rezultati[1])){
             viewHolder.migetTextView().setTextColor(Color.parseColor("#2196F3"));
-            viewHolder.vigetTextView().setTextColor(Color.parseColor("#000000"));
+            viewHolder.vigetTextView().setTextColor(color_text);
         }
         if (Integer.parseInt(rezultati[0])<Integer.parseInt(rezultati[1])){
-            viewHolder.migetTextView().setTextColor(Color.parseColor("#000000"));
+            viewHolder.migetTextView().setTextColor(color_text);
             viewHolder.vigetTextView().setTextColor(Color.parseColor("#F42414"));
         }
         if (Integer.parseInt(rezultati[0])==Integer.parseInt(rezultati[1])){
-            viewHolder.migetTextView().setTextColor(Color.parseColor("#000000"));
-            viewHolder.vigetTextView().setTextColor(Color.parseColor("#000000"));
+            viewHolder.migetTextView().setTextColor(color_text);
+            viewHolder.vigetTextView().setTextColor(color_text);
         }
         viewHolder.migetTextView().setText(rezultati[0]);
         viewHolder.vigetTextView().setText(rezultati[1]);

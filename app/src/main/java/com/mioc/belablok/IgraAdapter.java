@@ -1,15 +1,20 @@
 package com.mioc.belablok;
 
+import static com.mioc.belablok.FirstFragment.dark;
+
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.media.Image;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.ObjectInputStream;
@@ -78,19 +83,30 @@ public class IgraAdapter extends RecyclerView.Adapter<IgraAdapter.ViewHolder> {
 
         return new ViewHolder(view);
     }
-
+    int color_text;
+    int color_text1;
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
         viewHolder.migetTextView().setText(localDataSet.get(position).getBodoviMi());
         viewHolder.vigetTextView().setText(localDataSet.get(position).getBodoviVi());
+        TypedValue typedValue = new TypedValue();
+        Resources.Theme theme = viewHolder.vigetTextView().getContext().getTheme();
+        theme.resolveAttribute(android.R.attr.textColorPrimary, typedValue, true);
+        int color = ContextCompat.getColor(viewHolder.vigetTextView().getContext(), typedValue.resourceId);
+        color_text = Color.parseColor("#"+Integer.toHexString(color).substring(2));
+        TypedValue typedValue1 = new TypedValue();
+        Resources.Theme theme1 = viewHolder.vigetTextView().getContext().getTheme();
+        theme1.resolveAttribute(android.R.attr.textColorPrimaryInverse, typedValue1, true);
+        int color1 = ContextCompat.getColor(viewHolder.vigetTextView().getContext(), typedValue1.resourceId);
+        color_text1 = Color.parseColor("#"+Integer.toHexString(color1).substring(2));
         if (localDataSet.get(position).getZvali()[0]){
             if (!localDataSet.get(position).getZvali()[1]){
-                viewHolder.getImageView().setImageResource(R.mipmap.mi);
+                if(!dark){viewHolder.getImageView().setImageResource(R.mipmap.mi);}else{viewHolder.getImageView().setImageResource(R.mipmap.mi_dark_foreground);}
                 viewHolder.getImageView().setVisibility(View.VISIBLE);
             }
             if (localDataSet.get(position).getZvali()[1]){
-                viewHolder.getImageView().setImageResource(R.mipmap.vi);
+                if(!dark){viewHolder.getImageView().setImageResource(R.mipmap.vi);}else{viewHolder.getImageView().setImageResource(R.mipmap.vi_dark_foreground);}
                 viewHolder.getImageView().setVisibility(View.VISIBLE);
             }
         }
@@ -110,11 +126,11 @@ public class IgraAdapter extends RecyclerView.Adapter<IgraAdapter.ViewHolder> {
         Integer vi_int = Integer.parseInt(vi_bodovi);
         if (mi_int>vi_int){
             viewHolder.migetTextView().setTextColor(Color.parseColor("#2196F3"));
-            viewHolder.vigetTextView().setTextColor(Color.parseColor("#000000"));
+            viewHolder.vigetTextView().setTextColor(color_text);
         }
         if (vi_int>mi_int){
             viewHolder.vigetTextView().setTextColor(Color.parseColor("#F42414"));
-            viewHolder.migetTextView().setTextColor(Color.parseColor("#000000"));
+            viewHolder.migetTextView().setTextColor(color_text);
         }
     }
 

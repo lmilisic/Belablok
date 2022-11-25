@@ -10,12 +10,15 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ScaleDrawable;
 import android.os.Bundle;
 import android.provider.Telephony;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +28,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -110,11 +114,22 @@ public class FirstFragment extends Fragment {
         Log.d("TAG1111", "shared_prefs: "+contents);
         return contents;
     }
-
+    static int color_text;
+    int color_text1;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentFirstBinding.inflate(inflater, container, false);
         recyclerView = (RecyclerView) binding.getRoot().findViewById(R.id.rv);
+        TypedValue typedValue = new TypedValue();
+        Resources.Theme theme = recyclerView.getContext().getTheme();
+        theme.resolveAttribute(android.R.attr.textColorPrimary, typedValue, true);
+        int color = ContextCompat.getColor(recyclerView.getContext(), typedValue.resourceId);
+        color_text = Color.parseColor("#"+Integer.toHexString(color).substring(2));
+        TypedValue typedValue1 = new TypedValue();
+        Resources.Theme theme1 = recyclerView.getContext().getTheme();
+        theme1.resolveAttribute(android.R.attr.textColorPrimaryInverse, typedValue1, true);
+        int color1 = ContextCompat.getColor(recyclerView.getContext(), typedValue1.resourceId);
+        color_text1 = Color.parseColor("#"+Integer.toHexString(color1).substring(2));
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
@@ -123,7 +138,7 @@ public class FirstFragment extends Fragment {
         recyclerView.setAdapter(igradapter);
         return binding.getRoot();
     }
-
+    static Boolean dark = false;
     @SuppressLint("UnsafeOptInUsageError")
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -148,6 +163,14 @@ public class FirstFragment extends Fragment {
         ponisti = view.findViewById(R.id.button24);
         djelitelj = view.findViewById(R.id.imageView2);
         imageView4 = view.findViewById(R.id.imageView4);
+        switch (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) {
+            case Configuration.UI_MODE_NIGHT_YES:
+                dark = true;
+                break;
+            case Configuration.UI_MODE_NIGHT_NO:
+                dark = false;
+                break;
+        }
         mi.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -204,11 +227,11 @@ public class FirstFragment extends Fragment {
                 if (dijeli<=-1){dijeli = -1;}
                 dijeli += 1;
                 dijeli = dijeli%4;
-                if (dijeli==-1){djelitelj.setImageResource(R.mipmap.selected_no);}
-                if (dijeli==0){djelitelj.setImageResource(R.mipmap.selected_0);}
-                if (dijeli==1){djelitelj.setImageResource(R.mipmap.selected_1);}
-                if (dijeli==2){djelitelj.setImageResource(R.mipmap.selected_2);}
-                if (dijeli==3){djelitelj.setImageResource(R.mipmap.selected_3);}
+                if (dijeli==-1){if(!dark){djelitelj.setImageResource(R.mipmap.selected_no);}else{djelitelj.setImageResource(R.mipmap.selected_no_dark_foreground);}}
+                if (dijeli==0){if(!dark){djelitelj.setImageResource(R.mipmap.selected_0);}else{djelitelj.setImageResource(R.mipmap.selected_0_dark_foreground);}}
+                if (dijeli==1){if(!dark){djelitelj.setImageResource(R.mipmap.selected_1);}else{djelitelj.setImageResource(R.mipmap.selected_1_dark_foreground);}}
+                if (dijeli==2){if(!dark){djelitelj.setImageResource(R.mipmap.selected_2);}else{djelitelj.setImageResource(R.mipmap.selected_2_dark_foreground);}}
+                if (dijeli==3){if(!dark){djelitelj.setImageResource(R.mipmap.selected_3);}else{djelitelj.setImageResource(R.mipmap.selected_3_dark_foreground);}}
                 save(igre, pobjedaa, pobjednik, dijeli_prosli, dijeli, kraj, pobjede_mi, pobjede_vi);
             }
         });
@@ -216,7 +239,7 @@ public class FirstFragment extends Fragment {
             @Override
             public boolean onLongClick(View view) {
                 dijeli = -1;
-                djelitelj.setImageResource(R.mipmap.selected_no);
+                if (dijeli==-1){if(!dark){djelitelj.setImageResource(R.mipmap.selected_no);}else{djelitelj.setImageResource(R.mipmap.selected_no_dark_foreground);}}
                 save(igre, pobjedaa, pobjednik, dijeli_prosli, dijeli, kraj, pobjede_mi, pobjede_vi);
                 return true;
             }
@@ -288,15 +311,15 @@ public class FirstFragment extends Fragment {
             text_vi.setText(String.valueOf(zbroj_vi));
             if (zbroj_mi > zbroj_vi) {
                 text_mi.setTextColor(Color.parseColor("#2196F3"));
-                text_vi.setTextColor(Color.parseColor("#000000"));
+                text_vi.setTextColor(color_text);
             }
             if (zbroj_vi > zbroj_mi) {
                 text_vi.setTextColor(Color.parseColor("#F42414"));
-                text_mi.setTextColor(Color.parseColor("#000000"));
+                text_mi.setTextColor(color_text);
             }
             if (zbroj_vi.equals(zbroj_mi)) {
-                text_mi.setTextColor(Color.parseColor("#000000"));
-                text_vi.setTextColor(Color.parseColor("#000000"));
+                text_mi.setTextColor(color_text);
+                text_vi.setTextColor(color_text);
             }
         }
         if (!pobjedaa){
@@ -422,11 +445,11 @@ public class FirstFragment extends Fragment {
         razlika_mi.setText(String.valueOf(Math.abs(1001-zbroj_mi)));
         razlika_vi.setText(String.valueOf(Math.abs(1001-zbroj_vi)));
         dijeli = dijeli%4;
-        if (dijeli<=-1){djelitelj.setImageResource(R.mipmap.selected_no);}
-        if (dijeli==0){djelitelj.setImageResource(R.mipmap.selected_0);}
-        if (dijeli==1){djelitelj.setImageResource(R.mipmap.selected_1);}
-        if (dijeli==2){djelitelj.setImageResource(R.mipmap.selected_2);}
-        if (dijeli==3){djelitelj.setImageResource(R.mipmap.selected_3);}
+        if (dijeli<=-1){if(!dark){djelitelj.setImageResource(R.mipmap.selected_no);}else{djelitelj.setImageResource(R.mipmap.selected_no_dark_foreground);}}
+        if (dijeli==0){if(!dark){djelitelj.setImageResource(R.mipmap.selected_0);}else{djelitelj.setImageResource(R.mipmap.selected_0_dark_foreground);}}
+        if (dijeli==1){if(!dark){djelitelj.setImageResource(R.mipmap.selected_1);}else{djelitelj.setImageResource(R.mipmap.selected_1_dark_foreground);}}
+        if (dijeli==2){if(!dark){djelitelj.setImageResource(R.mipmap.selected_2);}else{djelitelj.setImageResource(R.mipmap.selected_2_dark_foreground);}}
+        if (dijeli==3){if(!dark){djelitelj.setImageResource(R.mipmap.selected_3);}else{djelitelj.setImageResource(R.mipmap.selected_3_dark_foreground);}}
         recyclerView.scrollToPosition(igre.size() - 1);
         qr = Base64.getEncoder().encodeToString(shared_prefs().getBytes());
         if (MainActivity.newString!=null){
