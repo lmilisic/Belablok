@@ -8,4 +8,7 @@
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <string name="mi">MI +</string>
     <string name="vi">VI +</string>
+    <string name="title_activity_live_matches">live_matches</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
 </resources>

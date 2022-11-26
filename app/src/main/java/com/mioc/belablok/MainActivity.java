@@ -2,11 +2,18 @@ package com.mioc.belablok;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static androidx.core.graphics.TypefaceCompatUtil.getTempFile;
+import static com.mioc.belablok.App.getContext;
 import static com.mioc.belablok.FirstFragment.igradapter;
+import static com.mioc.belablok.FirstFragment.live_indicator;
+import static com.mioc.belablok.FirstFragment.qr;
 import static com.mioc.belablok.Game_chooser.adapter;
 import static com.mioc.belablok.Game_chooser.dataSet;
+import static com.mioc.belablok.Game_chooser.id_mog_live_matcha;
 import static com.mioc.belablok.Game_chooser.readFromFile;
 import static com.mioc.belablok.Game_chooser.writeToFile;
+import static com.mioc.belablok.Game_chooser.writeToFile1;
+import static com.mioc.belablok.Game_chooser.writeToFile_datum_kreacije;
+import static com.mioc.belablok.Game_chooser.writeToFile_datum_promijenjeno;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -36,6 +43,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Environment;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -44,6 +52,7 @@ import android.view.View;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentTransitionImpl;
 import androidx.navigation.NavController;
@@ -81,9 +90,12 @@ import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,6 +109,8 @@ public class MainActivity extends AppCompatActivity {
     public ActionBarDrawerToggle actionBarDrawerToggle;
     public static TinyDB tinydb = new TinyDB(App.getContext());
     static Integer newString = null;
+    final Handler handler = new Handler();
+    public static Boolean live_bool = false;
 
     public static void save(ArrayList<Igre> igre, Boolean pobjedaa, Boolean pobjednik, Integer dijeli_prosli, Integer dijeli, Integer kraj, Integer pobjede_mi, Integer pobjede_vi){
         tinydb.putListObject("Igre", igre);
@@ -109,14 +123,34 @@ public class MainActivity extends AppCompatActivity {
         tinydb.putInt("pobjede_vi", pobjede_vi);
     }
     public static void load(){
-        FirstFragment.igre = tinydb.getListObject("Igre", Igre.class);
-        FirstFragment.pobjedaa = tinydb.getBoolean("pobjedaa");
-        FirstFragment.pobjednik = tinydb.getBoolean("pobjednik");
-        FirstFragment.dijeli_prosli = tinydb.getInt("dijeli_prosli");
-        FirstFragment.dijeli = tinydb.getInt("dijeli");
-        FirstFragment.kraj = tinydb.getInt("kraj");
-        FirstFragment.pobjede_mi = tinydb.getInt("pobjede_mi");
-        FirstFragment.pobjede_vi = tinydb.getInt("pobjede_vi");
+        if (!live_bool) {
+            FirstFragment.igre = tinydb.getListObject("Igre", Igre.class);
+            FirstFragment.pobjedaa = tinydb.getBoolean("pobjedaa");
+            FirstFragment.pobjednik = tinydb.getBoolean("pobjednik");
+            FirstFragment.dijeli_prosli = tinydb.getInt("dijeli_prosli");
+            FirstFragment.dijeli = tinydb.getInt("dijeli");
+            FirstFragment.kraj = tinydb.getInt("kraj");
+            FirstFragment.pobjede_mi = tinydb.getInt("pobjede_mi");
+            FirstFragment.pobjede_vi = tinydb.getInt("pobjede_vi");
+        }else{
+            Partije partija = LiveMatchesAdapter.localDataSet.get(newString);
+            ArrayList<String> lista = new ArrayList<String>(Arrays.asList(TextUtils.split(partija.igre, "‚‗‚")));
+            Gson gson = new Gson();
+            ArrayList<String> objStrings = lista;
+            ArrayList<Igre> objects =  new ArrayList<Igre>();
+            for(String jObjString : objStrings){
+                Object value  = gson.fromJson(jObjString,  Igre.class);
+                objects.add((Igre) value);
+            }
+            FirstFragment.igre = objects;
+            FirstFragment.pobjedaa = Boolean.valueOf(partija.pobjedaa);
+            FirstFragment.pobjednik = Boolean.valueOf(partija.pobjednik);
+            FirstFragment.dijeli_prosli = Integer.valueOf(partija.dijeli_prosli);
+            FirstFragment.dijeli = Integer.valueOf(partija.dijeli);
+            FirstFragment.kraj = Integer.valueOf(partija.kraj);
+            FirstFragment.pobjede_mi = Integer.valueOf(partija.mi_pobjede);
+            FirstFragment.pobjede_vi = Integer.valueOf(partija.vi_pobjede);
+        }
     }
     public static void switch_team(){
         FirstFragment.igre = tinydb.getListObject("Igre", Igre.class);
@@ -125,6 +159,8 @@ public class MainActivity extends AppCompatActivity {
             Igre prev = FirstFragment.igre.get(i);
             Boolean[] new_pali = prev.getPali().clone();
             Boolean[] new_zvali = prev.getZvali().clone();
+            Integer new_mi_suma_counter = prev.getMi_suma_counter();
+            Integer new_vi_suma_counter = prev.getVi_suma_counter();
             new_zvali[1] = !new_zvali[1];
             Boolean[] new_stiglja = prev.getStiglja().clone();
             new_stiglja[1] = !new_stiglja[1];
@@ -146,7 +182,9 @@ public class MainActivity extends AppCompatActivity {
                     prev.getVi_bodovi(),
                     prev.getMi_bodovi(),
                     prev.getVi_suma(),
-                    prev.getMi_suma()));
+                    prev.getMi_suma(),
+                    new_mi_suma_counter,
+                    new_vi_suma_counter));
         }
         FirstFragment.pobjedaa = tinydb.getBoolean("pobjedaa");
         FirstFragment.pobjednik = !tinydb.getBoolean("pobjednik");
@@ -166,6 +204,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Bundle extras = getIntent().getExtras();
         newString = extras.getInt(Intent.EXTRA_TEXT);
+        String live = extras.getString("isLive");
+        Log.d("TAG", "onCreate: "+live);
+        if (live.equals("true")){
+            live_bool = true;
+        }else{
+            live_bool = false;
+        }
         Log.e("TAG", "onCreate: "+String.valueOf(newString));
         final String PREFS_NAME = "MyPrefsFile";
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
@@ -179,7 +224,6 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setElevation(0);
         getSupportActionBar().setTitle("");
     }
-
     public static class ParameterStringBuilder {
         public static String getParamsString(Map<String, String> params)
                 throws UnsupportedEncodingException {
@@ -200,14 +244,32 @@ public class MainActivity extends AppCompatActivity {
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+        if (!live_bool){
+            getMenuInflater().inflate(R.menu.menu_main, menu);
+            return true;
+        }
+        return false;
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.izbrisi:
                 save(new ArrayList<Igre>(), false, false, 0, -1, 1001, 0, 0);
+                String datumi = Game_chooser.readFromFile_datum_promijenjeno(getContext()).trim();
+                String[] datumi1 = datumi.split("\\n");
+                StringBuilder output = new StringBuilder();
+                for(int i = 0; i < adapter.localDataSet.size(); i++){
+                    String s = "01/01/1970 00:00\n";
+                    if (i==MainActivity.newString){
+                        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yy HH:mm");
+                        Date date = new Date();
+                        s = dateFormat.format(date)+"\n";
+                    }else {
+                        s = datumi1[i]+"\n";
+                    }
+                    output.append(s);
+                }
+                writeToFile_datum_promijenjeno(output.toString(), getContext());
                 FirstFragment.recyclerView.setVisibility(View.VISIBLE);
                 FirstFragment.sv.setVisibility(View.GONE);
                 FirstFragment.pobjedaa = false;
@@ -215,7 +277,6 @@ public class MainActivity extends AppCompatActivity {
                 FirstFragment.igre.clear();
                 FirstFragment.pobjednik = false;
                 FirstFragment.dijeli_prosli = 0;
-                FirstFragment.kraj = 1001;
                 FirstFragment.pobjede_mi = 0;
                 FirstFragment.pobjede_vi = 0;
                 igradapter.notifyDataSetChanged();
@@ -223,7 +284,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.export_game:
                 ImageView imageCode = FirstFragment.imageView4;
-                String myText = FirstFragment.qr;
+                String myText = qr;
                 MultiFormatWriter mWriter = new MultiFormatWriter();
                 new Thread(new Runnable() {
                     public void run() {
@@ -313,23 +374,60 @@ public class MainActivity extends AppCompatActivity {
             case R.id.switch_team:
                 switch_team();
                 return true;
+            case R.id.export_game_to_file:
+                writeToFile(qr, getContext());
+                Intent intentShareFile = new Intent(Intent.ACTION_SEND);
+                File fileWithinMyDir = new File(getContext().getFilesDir(),"igra.txt");
+                if(fileWithinMyDir.exists()) {
+                    intentShareFile.setType("text/plain");
+                    intentShareFile.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", fileWithinMyDir));
+
+                    intentShareFile.putExtra(Intent.EXTRA_SUBJECT,
+                            "Sharing File...");
+                    intentShareFile.putExtra(Intent.EXTRA_TEXT, "Sharing File...");
+
+                    startActivity(Intent.createChooser(intentShareFile, "Share File"));
+                }
+                return true;
+            /*
+            case R.id.begin_live:
+                if (id_mog_live_matcha==-1) {
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            live_upload_game();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (Game_chooser.id_mog_live_matcha != -1) {
+                                        live_indicator.setVisibility(View.VISIBLE);
+                                    } else {
+                                        live_indicator.setVisibility(View.INVISIBLE);
+                                    }
+
+                                }
+                            });
+                        }
+                    }).start();
+                }
+                return true;
+            */
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
-
-
-/*
-    @Override
-    public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        return NavigationUI.navigateUp(navController, appBarConfiguration)
-                || super.onSupportNavigateUp();
+    private void writeToFile(String data,Context context) {
+        try {
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("igra.txt", Context.MODE_PRIVATE));
+            outputStreamWriter.write("belot!"+data);
+            outputStreamWriter.close();
+        }
+        catch (IOException e) {
+            Log.e("Exception", "File write failed: " + e.toString());
+        }
     }
-*/
     @Override
-    public void onBackPressed()
-    {
+    public void onBackPressed(){
         adapter.notifyItemChanged(newString);
         finish();
     }
@@ -372,18 +470,49 @@ public class MainActivity extends AppCompatActivity {
                                     con.disconnect();
                                     String rezultat = String.valueOf(content);
                                     if (rezultat.startsWith("belot!")){
-                                        String igre = readFromFile(getApplicationContext());
-                                        writeToFile(igre + "|" + rezultat, getApplicationContext());
+                                        String imena = Game_chooser.readFromFile1(getContext()).trim();
+                                        String[] imena1 = imena.split("\\n");
+                                        StringBuilder output = new StringBuilder();
+                                        for (int i = 0; i < imena1.length; i++){
+                                            String s = imena1[i]+"\n";
+                                            output.append(s);
+                                        }
+                                        output.append("Bezimena partija\n");
+                                        writeToFile1(output.toString(), getContext());
+                                        String datumi = Game_chooser.readFromFile_datum_kreacije(getContext()).trim();
+                                        String[] datumi1 = datumi.split("\\n");
+                                        output = new StringBuilder();
+                                        for(int i = 0; i < adapter.localDataSet.size(); i++){
+                                            String s = datumi1[i]+"\n";
+                                            output.append(s);
+                                        }
+                                        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yy HH:mm");
+                                        Date date = new Date();
+                                        output.append(dateFormat.format(date)+"\n");
+                                        writeToFile_datum_kreacije(output.toString(), getContext());
+                                        datumi = Game_chooser.readFromFile_datum_promijenjeno(getContext()).trim();
+                                        datumi1 = datumi.split("\\n");
+                                        output = new StringBuilder();
+                                        for(int i = 0; i < adapter.localDataSet.size(); i++){
+                                            String s = datumi1[i]+"\n";
+                                            output.append(s);
+                                        }
+                                        dateFormat = new SimpleDateFormat("dd/MM/yy HH:mm");
+                                        date = new Date();
+                                        output.append(dateFormat.format(date)+"\n");
+                                        writeToFile_datum_promijenjeno(output.toString(), getContext());
+                                        String igre = readFromFile(getApplicationContext()).trim();
+                                        Game_chooser.writeToFile(igre + "|" + rezultat, getApplicationContext());
                                         igre = readFromFile(getApplicationContext());
                                         dataSet = new ArrayList<Partije>();
                                         for (String i : igre.split("\\|")) {
                                             boolean b = !(i.trim().length() <= 1);
-                                            if (b) {
+                                            if (b){
                                                 dataSet.add(new Partije(i));
                                             }
                                         }
                                         runOnUiThread(new Runnable() {
-                                            public void run() {
+                                            public void run(){
                                                 adapter.localDataSet = dataSet;
                                                 adapter.notifyDataSetChanged();
                                                 Context context = getApplicationContext();
@@ -410,6 +539,7 @@ public class MainActivity extends AppCompatActivity {
                                 Context context = getApplicationContext();
                                 CharSequence text = "An error occurred! Check your internet connection!";
                                 int duration = Toast.LENGTH_LONG;
+                                Log.e("TAG", "run: ", exception);
                                 runOnUiThread(new Runnable() {
                                     public void run() {
                                         Toast.makeText(context, text, duration).show();
@@ -423,5 +553,79 @@ public class MainActivity extends AppCompatActivity {
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+    public void live_upload_game() {
+        try{
+            Map<String, String> parameters = new HashMap<>();
+            parameters.put("game", String.valueOf(id_mog_live_matcha));
+            String imena = Game_chooser.readFromFile1(getContext()).trim();
+            String[] imena1 = imena.split("\\n");
+            parameters.put("name", imena1[newString]);
+            String datumi = Game_chooser.readFromFile_datum_kreacije(getContext()).trim();
+            String[] datumi1 = datumi.split("\\n");
+            DateFormat dateFormat = new SimpleDateFormat("dd/MM/yy HH:mm");
+            Date date = dateFormat.parse(datumi1[newString]);
+            long unixTime = (long) date.getTime()/1000;
+            parameters.put("time_created", String.valueOf(unixTime));
+            datumi = Game_chooser.readFromFile_datum_promijenjeno(getContext()).trim();
+            datumi1 = datumi.split("\\n");
+            dateFormat = new SimpleDateFormat("dd/MM/yy HH:mm");
+            date = dateFormat.parse(datumi1[newString]);
+            unixTime = (long) date.getTime()/1000;
+            parameters.put("time_edited", String.valueOf(unixTime));
+            parameters.put("igra", "belot!"+qr);
+            URL url = new URL("https://evaluator.ddns.net/live_match.php");
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("POST");
+            con.setDoOutput(true);
+            DataOutputStream out = new DataOutputStream(con.getOutputStream());
+            out.writeBytes(ParameterStringBuilder.getParamsString(parameters));
+            out.flush();
+            out.close();
+            int status = con.getResponseCode();
+            Log.d("TAG", "run: "+String.valueOf(status));
+            if (String.valueOf(status).equals("200")) {
+                BufferedReader in = new BufferedReader(
+                        new InputStreamReader(con.getInputStream()));
+                String inputLine;
+                StringBuffer content = new StringBuffer();
+                while ((inputLine = in.readLine()) != null) {
+                    content.append(inputLine);
+                }
+                in.close();
+                con.disconnect();
+                id_mog_live_matcha = Integer.parseInt(String.valueOf(content));
+            }else{
+                Context context = getApplicationContext();
+                CharSequence text = "Check your internet connection!";
+                int duration = Toast.LENGTH_LONG;
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        Toast.makeText(context, text, duration).show();
+                    }
+                });
+            }
+        }
+        catch(Exception exception){
+            Log.e("TAG", "onOptionsItemSelected: ", exception);
+            Context context = getApplicationContext();
+            CharSequence text = "Check your internet connection! Data may be too long!";
+            int duration = Toast.LENGTH_LONG;
+            runOnUiThread(new Runnable() {
+                public void run() {
+                    Toast.makeText(context, text, duration).show();
+                }
+            });
+        }
+        executeTimedJob();
+    }
+    private void executeTimedJob(){
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                live_upload_game();
+                handler.postDelayed(this, 5000);
+            }
+        }, 5000);
     }
 }

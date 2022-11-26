@@ -8,7 +8,6 @@
         <item name="titleTextColor">#000000</item>
         <item name="subtitleTextColor">#FFFFFF</item>
         <item name="actionBarTheme">@style/ThemeOverlay.Actionbar</item>
-
         <!-- Secondary brand color. -->
         <item name="colorSecondary">#FFFFFF</item>
         <item name="colorSecondaryVariant">#FFFFFF</item>

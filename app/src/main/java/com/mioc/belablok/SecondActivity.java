@@ -2,25 +2,45 @@ package com.mioc.belablok;
 
 import static com.google.android.material.badge.BadgeUtils.attachBadgeDrawable;
 import static com.mioc.belablok.FirstFragment.igradapter;
+import static com.mioc.belablok.FirstFragment.kraj;
+import static com.mioc.belablok.FirstFragment.pobjede_mi;
+import static com.mioc.belablok.FirstFragment.pobjede_vi;
+import static com.mioc.belablok.Game_chooser.adapter;
+import static com.mioc.belablok.Game_chooser.writeToFile_datum_promijenjeno;
+import static com.mioc.belablok.VelikePartijeAdapter.context;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.ContextCompat;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.material.badge.BadgeDrawable;
+import com.google.android.material.button.MaterialButton;
 
+import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Objects;
 
 public class SecondActivity extends AppCompatActivity {
@@ -48,8 +68,8 @@ public class SecondActivity extends AppCompatActivity {
     Button zvanje_150_button;
     Button zvanje_200_button;
 
-    Button mi_zvali;
-    Button vi_zvali;
+    MaterialButton mi_zvali;
+    MaterialButton vi_zvali;
     Boolean[] zvali = {false, false};
 
     Button stiglja_button;
@@ -79,6 +99,8 @@ public class SecondActivity extends AppCompatActivity {
     final Integer[] broj_zvanje_200_vi = {0};
 
     final int[] fokus = new int[1];
+    final int[] mi_zvali_counter = {-1};
+    final int[] vi_zvali_counter = {-1};
 
     TextView mi_zvanja;
     TextView mi_suma;
@@ -92,6 +114,15 @@ public class SecondActivity extends AppCompatActivity {
     Double scalew;
     static int color_text;
     static int color_text1;
+    ConstraintLayout cl2;
+    int color_back;
+    TextView text_mi1;
+    TextView text_vi1;
+    TextView razlika1;
+    TextView razlika_mi1;
+    TextView razlika_vi1;
+    TextView mi_badge1;
+    TextView vi_badge1;
 
     private int dp_to_px(int dp){
         float dip = dp;
@@ -139,6 +170,49 @@ public class SecondActivity extends AppCompatActivity {
                     broj_zvanje_150_vi[0] = igra.getBroj_zvanje_150_vi();
                     broj_zvanje_200_mi[0] = igra.getBroj_zvanje_200_mi();
                     broj_zvanje_200_vi[0] = igra.getBroj_zvanje_200_vi();
+                    mi_zvali_counter[0] = igra.getMi_suma_counter();
+                    vi_zvali_counter[0] = igra.getVi_suma_counter();
+                    if (mi_zvali_counter[0] == 0 || mi_zvali_counter[0] == -1){
+                        mi_zvali.setText("MI");
+                        mi_zvali.setIcon(null);
+                    }
+                    if (mi_zvali_counter[0] == 1){
+                        mi_zvali.setText(null);
+                        mi_zvali.setIcon(AppCompatResources.getDrawable(context, R.mipmap.herc_plavi_foreground));
+                    }
+                    if (mi_zvali_counter[0] == 2){
+                        mi_zvali.setText(null);
+                        mi_zvali.setIcon(AppCompatResources.getDrawable(context, R.mipmap.karo_plavi_foreground));
+                    }
+                    if (mi_zvali_counter[0] == 3){
+                        mi_zvali.setText(null);
+                        mi_zvali.setIcon(AppCompatResources.getDrawable(context, R.mipmap.pik_plavi_foreground));
+                    }
+                    if (mi_zvali_counter[0] == 4){
+                        mi_zvali.setText(null);
+                        mi_zvali.setIcon(AppCompatResources.getDrawable(context, R.mipmap.tref_plavi_foreground));
+                    }
+
+                    if (vi_zvali_counter[0] == 0 || vi_zvali_counter[0] == -1){
+                        vi_zvali.setText("VI");
+                        vi_zvali.setIcon(null);
+                    }
+                    if (vi_zvali_counter[0] == 1){
+                        vi_zvali.setText(null);
+                        vi_zvali.setIcon(AppCompatResources.getDrawable(context, R.mipmap.herc_crveni_foreground));
+                    }
+                    if (vi_zvali_counter[0] == 2){
+                        vi_zvali.setText(null);
+                        vi_zvali.setIcon(AppCompatResources.getDrawable(context, R.mipmap.karo_crveni_foreground));
+                    }
+                    if (vi_zvali_counter[0] == 3){
+                        vi_zvali.setText(null);
+                        vi_zvali.setIcon(AppCompatResources.getDrawable(context, R.mipmap.pik_crveni_foreground));
+                    }
+                    if (vi_zvali_counter[0] == 4){
+                        vi_zvali.setText(null);
+                        vi_zvali.setIcon(AppCompatResources.getDrawable(context, R.mipmap.tref_crveni_foreground));
+                    }
                     mi_zvanja.setText("+"+igra.mi_zvanje);
                     vi_zvanja.setText("+"+igra.vi_zvanje);
                     mi_bodovi.setText(igra.mi_bodovi);
@@ -234,91 +308,168 @@ public class SecondActivity extends AppCompatActivity {
                     if (fokus[0]==1){
                         int parentId = ((View) vi_bodovi.getParent()).getId();
 
-                        ConstraintLayout.LayoutParams dividerlayout = new ConstraintLayout.LayoutParams((int)(dp_to_px(409)),(int) (dp_to_px(1)));
-                        dividerlayout.topMargin=dp_to_px(8);
-                        dividerlayout.bottomMargin=dp_to_px(8);
-                        dividerlayout.topToBottom=R.id.vi_suma;
-                        dividerlayout.startToStart=parentId;
-                        dividerlayout.endToEnd=parentId;
-                        dividerlayout.bottomToTop=R.id.button14;
-                        View divider = findViewById(R.id.divider2);
-                        divider.setLayoutParams(dividerlayout);
-
-                        ConstraintLayout.LayoutParams veci = new ConstraintLayout.LayoutParams((int)(dp_to_px(150)), (int)(dp_to_px(90)));
-                        veci.startToStart=R.id.divider;
-                        veci.topToTop=parentId;
-                        veci.topMargin=dp_to_px(8);
+                        ConstraintLayout.LayoutParams veci = (ConstraintLayout.LayoutParams) vi_bodovi.getLayoutParams();
+                        ConstraintLayout constraintLayout = findViewById(R.id.cl);
+                        ConstraintSet constraintSet = new ConstraintSet();
+                        constraintSet.clone(constraintLayout);
+                        constraintSet.connect(R.id.button_vi_bodovi,ConstraintSet.END,R.id.gumb_desno_veliki_vi,ConstraintSet.START,0);
+                        constraintSet.connect(R.id.button_vi_bodovi,ConstraintSet.START,R.id.gumb_lijevo_veliki_vi,ConstraintSet.END,0);
+                        constraintSet.connect(R.id.button_vi_bodovi,ConstraintSet.BOTTOM,R.id.gumb_dolje_veliki,ConstraintSet.TOP,0);
+                        constraintSet.connect(R.id.button_vi_bodovi,ConstraintSet.TOP,R.id.gumb_gore_veliki,ConstraintSet.BOTTOM,0);
+                        constraintSet.applyTo(constraintLayout);
                         vi_bodovi.setTextColor(Color.WHITE);
-                        vi_bodovi.setTextSize(TypedValue.COMPLEX_UNIT_SP, 50);
-                        ConstraintLayout.LayoutParams manji = new ConstraintLayout.LayoutParams((int)(dp_to_px(110)), (int)(dp_to_px(75)));
-                        manji.bottomToBottom=R.id.button_vi_bodovi;
-                        manji.endToEnd=R.id.divider;
-                        manji.topToTop=R.id.button_vi_bodovi;
-                        manji.rightMargin=dp_to_px(24);
+                        vi_bodovi.setTextSize(TypedValue.COMPLEX_UNIT_SP, (float) (55*scaleh));
+
+                        ConstraintLayout.LayoutParams manji = (ConstraintLayout.LayoutParams) mi_bodovi.getLayoutParams();
+                        constraintLayout = findViewById(R.id.cl);
+                        constraintSet = new ConstraintSet();
+                        constraintSet.clone(constraintLayout);
+                        constraintSet.connect(R.id.button_mi_bodovi,ConstraintSet.END,R.id.gumb_desno_mali_mi,ConstraintSet.START,0);
+                        constraintSet.connect(R.id.button_mi_bodovi,ConstraintSet.START,R.id.gumb_lijevo_mali_mi,ConstraintSet.END,0);
+                        constraintSet.connect(R.id.button_mi_bodovi,ConstraintSet.BOTTOM,R.id.gumb_dolje_mali,ConstraintSet.TOP,0);
+                        constraintSet.connect(R.id.button_mi_bodovi,ConstraintSet.TOP,R.id.gumb_gore_mali,ConstraintSet.BOTTOM,0);
+                        constraintSet.applyTo(constraintLayout);
                         mi_bodovi.setTextColor(Color.rgb(16,65,104));
-                        mi_bodovi.setTextSize(TypedValue.COMPLEX_UNIT_SP, 35);
+                        mi_bodovi.setTextSize(TypedValue.COMPLEX_UNIT_SP, (float) (35*scaleh));
+
+                        ConstraintLayout.LayoutParams mizvanja = (ConstraintLayout.LayoutParams) mi_zvanja.getLayoutParams();
+                        mizvanja.startToStart=R.id.gumb_lijevo_mali_mi;
+                        mizvanja.topToTop=R.id.gumb_dolje_mali;
+
+                        ConstraintLayout.LayoutParams vizvanja = (ConstraintLayout.LayoutParams) vi_zvanja.getLayoutParams();
+                        vizvanja.startToStart=R.id.gumb_lijevo_veliki_vi;
+                        vizvanja.topToTop=R.id.gumb_dolje_veliki;
+
+                        ConstraintLayout.LayoutParams misuma = (ConstraintLayout.LayoutParams) mi_suma.getLayoutParams();
+                        misuma.endToStart=R.id.gumb_desno_mali_mi;
+                        misuma.topToTop=R.id.gumb_dolje_mali;
+
+                        ConstraintLayout.LayoutParams visuma = (ConstraintLayout.LayoutParams) vi_suma.getLayoutParams();
+                        visuma.endToStart=R.id.gumb_desno_veliki_vi;
+                        visuma.topToTop=R.id.gumb_dolje_veliki;
+
+                        mi_zvanja.setLayoutParams(mizvanja);
+                        vi_zvanja.setLayoutParams(vizvanja);
+                        mi_suma.setLayoutParams(misuma);
+                        vi_suma.setLayoutParams(visuma);
+                        veci.width = ConstraintLayout.LayoutParams.MATCH_PARENT;
+                        veci.height = ConstraintLayout.LayoutParams.MATCH_PARENT;
+                        manji.width = ConstraintLayout.LayoutParams.MATCH_PARENT;
+                        manji.height = ConstraintLayout.LayoutParams.MATCH_PARENT;
+                        veci.constrainedHeight = true;
+                        veci.constrainedWidth = true;
+                        manji.constrainedHeight = true;
+                        manji.constrainedWidth = true;
                         vi_bodovi.setLayoutParams(veci);
                         mi_bodovi.setLayoutParams(manji);
-                        Button[] array = new Button[]{mi_bodovi, vi_bodovi};
-                        for (int i=0; i < array.length; i++){
-                            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) array[i].getLayoutParams();
-                            params.height *= scaleh;
-                            params.width *= scalew;
-                            params.topMargin *= scaleh;
-                            params.bottomMargin *= scaleh;
-                            params.rightMargin *= scalew;
-                            params.leftMargin *= scalew;
-                            array[i].setLayoutParams(params);
-                        }
                     }
                     else{
                         int parentId = ((View) mi_bodovi.getParent()).getId();
 
-                        ConstraintLayout.LayoutParams dividerlayout = new ConstraintLayout.LayoutParams((int)(dp_to_px(409)), (int)(dp_to_px(1)));
-                        dividerlayout.topMargin=dp_to_px(8);
-                        dividerlayout.bottomMargin=dp_to_px(8);
-                        dividerlayout.topToBottom=R.id.mi_suma;
-                        dividerlayout.startToStart=parentId;
-                        dividerlayout.endToEnd=parentId;
-                        dividerlayout.bottomToTop=R.id.button14;
-                        View divider = findViewById(R.id.divider2);
-                        divider.setLayoutParams(dividerlayout);
-
-                        ConstraintLayout.LayoutParams veci = new ConstraintLayout.LayoutParams((int)(dp_to_px(150)), (int)(dp_to_px(90)));
-                        veci.endToStart=R.id.divider;
-                        veci.topToTop=parentId;
-                        veci.topMargin=dp_to_px(8);
+                        ConstraintLayout.LayoutParams veci = (ConstraintLayout.LayoutParams) mi_bodovi.getLayoutParams();
+                        ConstraintLayout constraintLayout = findViewById(R.id.cl);
+                        ConstraintSet constraintSet = new ConstraintSet();
+                        constraintSet.clone(constraintLayout);
+                        constraintSet.connect(R.id.button_mi_bodovi,ConstraintSet.END,R.id.gumb_desno_veliki_mi,ConstraintSet.START,0);
+                        constraintSet.connect(R.id.button_mi_bodovi,ConstraintSet.START,R.id.gumb_lijevo_veliki_mi,ConstraintSet.END,0);
+                        constraintSet.connect(R.id.button_mi_bodovi,ConstraintSet.BOTTOM,R.id.gumb_dolje_veliki,ConstraintSet.TOP,0);
+                        constraintSet.connect(R.id.button_mi_bodovi,ConstraintSet.TOP,R.id.gumb_gore_veliki,ConstraintSet.BOTTOM,0);
+                        constraintSet.applyTo(constraintLayout);
                         mi_bodovi.setTextColor(Color.WHITE);
-                        mi_bodovi.setTextSize(TypedValue.COMPLEX_UNIT_SP, 50);
+                        mi_bodovi.setTextSize(TypedValue.COMPLEX_UNIT_SP, (float) (55*scaleh));
 
-                        ConstraintLayout.LayoutParams manji = new ConstraintLayout.LayoutParams((int)(dp_to_px(110)), (int)(dp_to_px(75)));
-                        manji.bottomToBottom=R.id.button_mi_bodovi;
-                        manji.startToEnd=R.id.divider;
-                        manji.topToTop=R.id.button_mi_bodovi;
-                        manji.leftMargin=dp_to_px(24);
 
+                        ConstraintLayout.LayoutParams manji = (ConstraintLayout.LayoutParams) vi_bodovi.getLayoutParams();
+                        constraintLayout = findViewById(R.id.cl);
+                        constraintSet = new ConstraintSet();
+                        constraintSet.clone(constraintLayout);
+                        constraintSet.connect(R.id.button_vi_bodovi,ConstraintSet.END,R.id.gumb_desno_mali_vi,ConstraintSet.START,0);
+                        constraintSet.connect(R.id.button_vi_bodovi,ConstraintSet.START,R.id.gumb_lijevo_mali_vi,ConstraintSet.END,0);
+                        constraintSet.connect(R.id.button_vi_bodovi,ConstraintSet.BOTTOM,R.id.gumb_dolje_mali,ConstraintSet.TOP,0);
+                        constraintSet.connect(R.id.button_vi_bodovi,ConstraintSet.TOP,R.id.gumb_gore_mali,ConstraintSet.BOTTOM,0);
+                        constraintSet.applyTo(constraintLayout);
                         vi_bodovi.setTextColor(Color.parseColor("#680E07"));
-                        vi_bodovi.setTextSize(TypedValue.COMPLEX_UNIT_SP, 35);
+                        vi_bodovi.setTextSize(TypedValue.COMPLEX_UNIT_SP, (float) (35*scaleh));
+
+                        ConstraintLayout.LayoutParams mizvanja = (ConstraintLayout.LayoutParams) mi_zvanja.getLayoutParams();
+                        mizvanja.startToStart=R.id.gumb_lijevo_veliki_mi;
+                        mizvanja.topToTop=R.id.gumb_dolje_veliki;
+
+                        ConstraintLayout.LayoutParams vizvanja = (ConstraintLayout.LayoutParams) vi_zvanja.getLayoutParams();
+                        vizvanja.startToStart=R.id.gumb_lijevo_mali_vi;
+                        vizvanja.topToTop=R.id.gumb_dolje_mali;
+
+                        ConstraintLayout.LayoutParams misuma = (ConstraintLayout.LayoutParams) mi_suma.getLayoutParams();
+                        misuma.endToStart=R.id.gumb_desno_veliki_mi;
+                        misuma.topToTop=R.id.gumb_dolje_veliki;
+
+                        ConstraintLayout.LayoutParams visuma = (ConstraintLayout.LayoutParams) vi_suma.getLayoutParams();
+                        visuma.endToStart=R.id.gumb_desno_mali_vi;
+                        visuma.topToTop=R.id.gumb_dolje_mali;
+
+                        mi_zvanja.setLayoutParams(mizvanja);
+                        vi_zvanja.setLayoutParams(vizvanja);
+                        mi_suma.setLayoutParams(misuma);
+                        vi_suma.setLayoutParams(visuma);
+                        veci.width = ConstraintLayout.LayoutParams.MATCH_PARENT;
+                        veci.height = ConstraintLayout.LayoutParams.MATCH_PARENT;
+                        manji.width = ConstraintLayout.LayoutParams.MATCH_PARENT;
+                        manji.height = ConstraintLayout.LayoutParams.MATCH_PARENT;
+                        veci.constrainedHeight = true;
+                        veci.constrainedWidth = true;
+                        manji.constrainedHeight = true;
+                        manji.constrainedWidth = true;
                         mi_bodovi.setLayoutParams(veci);
                         vi_bodovi.setLayoutParams(manji);
-                        Button[] array = new Button[]{mi_bodovi, vi_bodovi};
-                        for (int i=0; i < array.length; i++){
-                            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) array[i].getLayoutParams();
-                            params.height *= scaleh;
-                            params.width *= scalew;
-                            params.topMargin *= scaleh;
-                            params.bottomMargin *= scaleh;
-                            params.rightMargin *= scalew;
-                            params.leftMargin *= scalew;
-                            array[i].setLayoutParams(params);
-                        }
                     }
                 }
             }
         });
     }
+
     public void izracunaj(){
         pali[0]=false;
+        if (mi_zvali_counter[0] == 0 || mi_zvali_counter[0] == -1){
+            mi_zvali.setText("MI");
+            mi_zvali.setIcon(null);
+        }
+        if (mi_zvali_counter[0] == 1){
+            mi_zvali.setText(null);
+            mi_zvali.setIcon(AppCompatResources.getDrawable(context, R.mipmap.herc_plavi_foreground));
+        }
+        if (mi_zvali_counter[0] == 2){
+            mi_zvali.setText(null);
+            mi_zvali.setIcon(AppCompatResources.getDrawable(context, R.mipmap.karo_plavi_foreground));
+        }
+        if (mi_zvali_counter[0] == 3){
+            mi_zvali.setText(null);
+            mi_zvali.setIcon(AppCompatResources.getDrawable(context, R.mipmap.pik_plavi_foreground));
+        }
+        if (mi_zvali_counter[0] == 4){
+            mi_zvali.setText(null);
+            mi_zvali.setIcon(AppCompatResources.getDrawable(context, R.mipmap.tref_plavi_foreground));
+        }
+
+        if (vi_zvali_counter[0] == 0 || vi_zvali_counter[0] == -1){
+            vi_zvali.setText("VI");
+            vi_zvali.setIcon(null);
+        }
+        if (vi_zvali_counter[0] == 1){
+            vi_zvali.setText(null);
+            vi_zvali.setIcon(AppCompatResources.getDrawable(context, R.mipmap.herc_crveni_foreground));
+        }
+        if (vi_zvali_counter[0] == 2){
+            vi_zvali.setText(null);
+            vi_zvali.setIcon(AppCompatResources.getDrawable(context, R.mipmap.karo_crveni_foreground));
+        }
+        if (vi_zvali_counter[0] == 3){
+            vi_zvali.setText(null);
+            vi_zvali.setIcon(AppCompatResources.getDrawable(context, R.mipmap.pik_crveni_foreground));
+        }
+        if (vi_zvali_counter[0] == 4){
+            vi_zvali.setText(null);
+            vi_zvali.setIcon(AppCompatResources.getDrawable(context, R.mipmap.tref_crveni_foreground));
+        }
         int mi_zvanja_int_priznato = broj_zvanje_20_mi[0]*20+broj_zvanje_50_mi[0]*50+broj_zvanje_100_mi[0]*100+broj_zvanje_150_mi[0]*150+broj_zvanje_200_mi[0]*200;
         int vi_zvanja_int_priznato = broj_zvanje_20_vi[0]*20+broj_zvanje_50_vi[0]*50+broj_zvanje_100_vi[0]*100+broj_zvanje_150_vi[0]*150+broj_zvanje_200_vi[0]*200;
         int mi_zvanja_int = broj_zvanje_20_mi[0]*20+broj_zvanje_50_mi[0]*50+broj_zvanje_100_mi[0]*100+broj_zvanje_150_mi[0]*150+broj_zvanje_200_mi[0]*200;
@@ -374,34 +525,31 @@ public class SecondActivity extends AppCompatActivity {
         mi_zvanja.setText("+"+String.valueOf(mi_zvanja_int_priznato));
         vi_zvanja.setText("+"+String.valueOf(vi_zvanja_int_priznato));
     }
+    public static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = BigDecimal.valueOf(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     @SuppressLint("UnsafeOptInUsageError")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_second);
-        scaleh = getResources().getDisplayMetrics().heightPixels/2072.0;
-        scalew = getResources().getDisplayMetrics().widthPixels/1080.0;
-        if (scaleh>1.0){
-            scaleh = 1.0;
-        }
-        if (scalew>1.0){
-            scalew = 1.0;
-        }
-        if (scaleh<0.5){
-            scaleh = 0.7;
-        }
-        else if (scaleh<1.0){
-            scaleh = 0.8;
-        }
-        if (scalew<0.5){
-            scalew = 0.7;
-        }
-        else if (scalew<1.0){
-            scalew = 0.8;
-        }
+        scaleh = round(((getResources().getDisplayMetrics().heightPixels)*0.0994)/206, 2);
+        scalew = round(((getResources().getDisplayMetrics().widthPixels)*0.1907)/206, 2);
         Bundle extras = getIntent().getExtras();
         newString = extras.getString(Intent.EXTRA_TEXT);
         dosao_iz_pobjede = extras.getBoolean("NOVA");
+        text_mi1 = findViewById(R.id.textview_mi_bodovi2);
+        text_vi1 = findViewById(R.id.textview_vi_bodovi2);
+        razlika1 = findViewById(R.id.razlika2);
+        razlika_mi1 = findViewById(R.id.razlika_mi2);
+        razlika_vi1 = findViewById(R.id.razlika_vi2);
+        mi_badge1 = findViewById(R.id.mi_badge);
+        vi_badge1 = findViewById(R.id.vi_badge);
         vi_bodovi = findViewById(R.id.button_vi_bodovi);
         mi_bodovi = findViewById(R.id.button_mi_bodovi);
         ponisti = findViewById(R.id.button20);
@@ -416,6 +564,16 @@ public class SecondActivity extends AppCompatActivity {
         devet = findViewById(R.id.button9);
         nula = findViewById(R.id.button11);
         brisanje = findViewById(R.id.button12);
+        TypedValue typedValue2 = new TypedValue();
+        if (this.getTheme().resolveAttribute(android.R.attr.windowBackground, typedValue2, true))
+        {
+            color_back = typedValue2.data;
+        }
+        cl2 = findViewById(R.id.cl2);
+        Log.d("VISINADUZINA1", "onCreate: "+brisanje.getLayoutParams().height);
+        Log.d("VISINADUZINA1", "onCreate: "+getResources().getDisplayMetrics().heightPixels);
+        Log.d("VISINADUZINA2", "onCreate: "+brisanje.getLayoutParams().width);
+        Log.d("VISINADUZINA2", "onCreate: "+getResources().getDisplayMetrics().widthPixels);
         TypedValue typedValue = new TypedValue();
         Resources.Theme theme = vi_bodovi.getContext().getTheme();
         theme.resolveAttribute(android.R.attr.textColorPrimary, typedValue, true);
@@ -453,134 +611,68 @@ public class SecondActivity extends AppCompatActivity {
         mi_200 = setbadge(zvanje_200_button, 0, false, "#000000", BadgeDrawable.TOP_END);
         vi_200 = setbadge(zvanje_200_button, 0, false, "#000000", BadgeDrawable.BOTTOM_END);
 
-        if (Objects.equals(newString, "VI")){
-            fokus[0] = 1;
-            int parentId = ((View) vi_bodovi.getParent()).getId();
 
-            ConstraintLayout.LayoutParams dividerlayout = new ConstraintLayout.LayoutParams((int)(dp_to_px(409)), (int)((dp_to_px(1))));
-            dividerlayout.topMargin=dp_to_px(8);
-            dividerlayout.bottomMargin=dp_to_px(8);
-            dividerlayout.topToBottom=R.id.vi_suma;
-            dividerlayout.startToStart=parentId;
-            dividerlayout.endToEnd=parentId;
-            dividerlayout.bottomToTop=R.id.button14;
-            View divider = findViewById(R.id.divider2);
-            divider.setLayoutParams(dividerlayout);
-
-            ConstraintLayout.LayoutParams veci = new ConstraintLayout.LayoutParams((int)(dp_to_px(150)), (int)(dp_to_px(90)));
-            veci.startToStart=R.id.divider;
-            veci.topToTop=parentId;
-            veci.topMargin=dp_to_px(8);
-            vi_bodovi.setTextColor(Color.WHITE);
-            vi_bodovi.setTextSize(TypedValue.COMPLEX_UNIT_SP, 50);
-            ConstraintLayout.LayoutParams manji = new ConstraintLayout.LayoutParams((int)(dp_to_px(110)), (int)(dp_to_px(75)));
-            manji.bottomToBottom=R.id.button_vi_bodovi;
-            manji.endToEnd=R.id.divider;
-            manji.topToTop=R.id.button_vi_bodovi;
-            manji.rightMargin=dp_to_px(24);
-            mi_bodovi.setTextColor(Color.rgb(16,65,104));
-            mi_bodovi.setTextSize(TypedValue.COMPLEX_UNIT_SP, 35);
-            vi_bodovi.setLayoutParams(veci);
-            mi_bodovi.setLayoutParams(manji);
-            Button[] array = new Button[]{mi_bodovi, vi_bodovi};
-            for (int i=0; i < array.length; i++){
-                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) array[i].getLayoutParams();
-                params.height *= scaleh;
-                params.width *= scalew;
-                params.topMargin *= scaleh;
-                params.bottomMargin *= scaleh;
-                params.rightMargin *= scalew;
-                params.leftMargin *= scalew;
-                array[i].setLayoutParams(params);
-            }
-        }
-        else{
-            fokus[0] = 0;
-            int parentId = ((View) mi_bodovi.getParent()).getId();
-
-            ConstraintLayout.LayoutParams dividerlayout = new ConstraintLayout.LayoutParams((int)(dp_to_px(409)), (int)(dp_to_px(1)));
-            dividerlayout.topMargin=dp_to_px(8);
-            dividerlayout.bottomMargin=dp_to_px(8);
-            dividerlayout.topToBottom=R.id.mi_suma;
-            dividerlayout.startToStart=parentId;
-            dividerlayout.endToEnd=parentId;
-            dividerlayout.bottomToTop=R.id.button14;
-            View divider = findViewById(R.id.divider2);
-            divider.setLayoutParams(dividerlayout);
-
-            ConstraintLayout.LayoutParams veci = new ConstraintLayout.LayoutParams((int)(dp_to_px(150)), (int)(dp_to_px(90)));
-            veci.endToStart=R.id.divider;
-            veci.topToTop=parentId;
-            veci.topMargin=dp_to_px(8);
-            mi_bodovi.setTextColor(Color.WHITE);
-            mi_bodovi.setTextSize(TypedValue.COMPLEX_UNIT_SP, 50);
-
-            ConstraintLayout.LayoutParams manji = new ConstraintLayout.LayoutParams((int)(dp_to_px(110)), (int)(dp_to_px(75)));
-            manji.bottomToBottom=R.id.button_mi_bodovi;
-            manji.startToEnd=R.id.divider;
-            manji.topToTop=R.id.button_mi_bodovi;
-            manji.leftMargin=dp_to_px(24);
-
-            vi_bodovi.setTextColor(Color.parseColor("#680E07"));
-            vi_bodovi.setTextSize(TypedValue.COMPLEX_UNIT_SP, 35);
-            mi_bodovi.setLayoutParams(veci);
-            vi_bodovi.setLayoutParams(manji);
-            Button[] array = new Button[]{mi_bodovi, vi_bodovi};
-            for (int i=0; i < array.length; i++){
-                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) array[i].getLayoutParams();
-                params.height *= scaleh;
-                params.width *= scalew;
-                params.topMargin *= scaleh;
-                params.bottomMargin *= scaleh;
-                params.rightMargin *= scalew;
-                params.leftMargin *= scalew;
-                array[i].setLayoutParams(params);
-            }
-        }
         mi_bodovi.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 fokus[0] = 0;
                 int parentId = ((View) mi_bodovi.getParent()).getId();
 
-                ConstraintLayout.LayoutParams dividerlayout = new ConstraintLayout.LayoutParams((int)(dp_to_px(409)), (int)(dp_to_px(1)));
-                dividerlayout.topMargin=dp_to_px(8);
-                dividerlayout.bottomMargin=dp_to_px(8);
-                dividerlayout.topToBottom=R.id.mi_suma;
-                dividerlayout.startToStart=parentId;
-                dividerlayout.endToEnd=parentId;
-                dividerlayout.bottomToTop=R.id.button14;
-                View divider = findViewById(R.id.divider2);
-                divider.setLayoutParams(dividerlayout);
-
-                ConstraintLayout.LayoutParams veci = new ConstraintLayout.LayoutParams((int)(dp_to_px(150)), (int)(dp_to_px(90)));
-                veci.endToStart=R.id.divider;
-                veci.topToTop=parentId;
-                veci.topMargin=dp_to_px(8);
+                ConstraintLayout.LayoutParams veci = (ConstraintLayout.LayoutParams) mi_bodovi.getLayoutParams();
+                ConstraintLayout constraintLayout = findViewById(R.id.cl);
+                ConstraintSet constraintSet = new ConstraintSet();
+                constraintSet.clone(constraintLayout);
+                constraintSet.connect(R.id.button_mi_bodovi,ConstraintSet.END,R.id.gumb_desno_veliki_mi,ConstraintSet.START,0);
+                constraintSet.connect(R.id.button_mi_bodovi,ConstraintSet.START,R.id.gumb_lijevo_veliki_mi,ConstraintSet.END,0);
+                constraintSet.connect(R.id.button_mi_bodovi,ConstraintSet.BOTTOM,R.id.gumb_dolje_veliki,ConstraintSet.TOP,0);
+                constraintSet.connect(R.id.button_mi_bodovi,ConstraintSet.TOP,R.id.gumb_gore_veliki,ConstraintSet.BOTTOM,0);
+                constraintSet.applyTo(constraintLayout);
                 mi_bodovi.setTextColor(Color.WHITE);
-                mi_bodovi.setTextSize(TypedValue.COMPLEX_UNIT_SP, 50);
+                mi_bodovi.setTextSize(TypedValue.COMPLEX_UNIT_SP, (float) (55*scaleh));
 
-                ConstraintLayout.LayoutParams manji = new ConstraintLayout.LayoutParams((int)(dp_to_px(110)), (int)(dp_to_px(75)));
-                manji.bottomToBottom=R.id.button_mi_bodovi;
-                manji.startToEnd=R.id.divider;
-                manji.topToTop=R.id.button_mi_bodovi;
-                manji.leftMargin=dp_to_px(24);
 
+                ConstraintLayout.LayoutParams manji = (ConstraintLayout.LayoutParams) vi_bodovi.getLayoutParams();
+                constraintLayout = findViewById(R.id.cl);
+                constraintSet = new ConstraintSet();
+                constraintSet.clone(constraintLayout);
+                constraintSet.connect(R.id.button_vi_bodovi,ConstraintSet.END,R.id.gumb_desno_mali_vi,ConstraintSet.START,0);
+                constraintSet.connect(R.id.button_vi_bodovi,ConstraintSet.START,R.id.gumb_lijevo_mali_vi,ConstraintSet.END,0);
+                constraintSet.connect(R.id.button_vi_bodovi,ConstraintSet.BOTTOM,R.id.gumb_dolje_mali,ConstraintSet.TOP,0);
+                constraintSet.connect(R.id.button_vi_bodovi,ConstraintSet.TOP,R.id.gumb_gore_mali,ConstraintSet.BOTTOM,0);
+                constraintSet.applyTo(constraintLayout);
                 vi_bodovi.setTextColor(Color.parseColor("#680E07"));
-                vi_bodovi.setTextSize(TypedValue.COMPLEX_UNIT_SP, 35);
+                vi_bodovi.setTextSize(TypedValue.COMPLEX_UNIT_SP, (float) (35*scaleh));
+
+                ConstraintLayout.LayoutParams mizvanja = (ConstraintLayout.LayoutParams) mi_zvanja.getLayoutParams();
+                mizvanja.startToStart=R.id.gumb_lijevo_veliki_mi;
+                mizvanja.topToTop=R.id.gumb_dolje_veliki;
+
+                ConstraintLayout.LayoutParams vizvanja = (ConstraintLayout.LayoutParams) vi_zvanja.getLayoutParams();
+                vizvanja.startToStart=R.id.gumb_lijevo_mali_vi;
+                vizvanja.topToTop=R.id.gumb_dolje_mali;
+
+                ConstraintLayout.LayoutParams misuma = (ConstraintLayout.LayoutParams) mi_suma.getLayoutParams();
+                misuma.endToStart=R.id.gumb_desno_veliki_mi;
+                misuma.topToTop=R.id.gumb_dolje_veliki;
+
+                ConstraintLayout.LayoutParams visuma = (ConstraintLayout.LayoutParams) vi_suma.getLayoutParams();
+                visuma.endToStart=R.id.gumb_desno_mali_vi;
+                visuma.topToTop=R.id.gumb_dolje_mali;
+
+                mi_zvanja.setLayoutParams(mizvanja);
+                vi_zvanja.setLayoutParams(vizvanja);
+                mi_suma.setLayoutParams(misuma);
+                vi_suma.setLayoutParams(visuma);
+                veci.width = ConstraintLayout.LayoutParams.MATCH_PARENT;
+                veci.height = ConstraintLayout.LayoutParams.MATCH_PARENT;
+                manji.width = ConstraintLayout.LayoutParams.MATCH_PARENT;
+                manji.height = ConstraintLayout.LayoutParams.MATCH_PARENT;
+                veci.constrainedHeight = true;
+                veci.constrainedWidth = true;
+                manji.constrainedHeight = true;
+                manji.constrainedWidth = true;
                 mi_bodovi.setLayoutParams(veci);
                 vi_bodovi.setLayoutParams(manji);
-                Button[] array = new Button[]{mi_bodovi, vi_bodovi};
-                for (int i=0; i < array.length; i++){
-                    ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) array[i].getLayoutParams();
-                    params.height *= scaleh;
-                    params.width *= scalew;
-                    params.topMargin *= scaleh;
-                    params.bottomMargin *= scaleh;
-                    params.rightMargin *= scalew;
-                    params.leftMargin *= scalew;
-                    array[i].setLayoutParams(params);
-                }
             }
         });
         vi_bodovi.setOnClickListener(new View.OnClickListener() {
@@ -589,42 +681,60 @@ public class SecondActivity extends AppCompatActivity {
                 fokus[0] = 1;
                 int parentId = ((View) vi_bodovi.getParent()).getId();
 
-                ConstraintLayout.LayoutParams dividerlayout = new ConstraintLayout.LayoutParams((int)(dp_to_px(409)),(int)(dp_to_px(1)));
-                dividerlayout.topMargin=dp_to_px(8);
-                dividerlayout.bottomMargin=dp_to_px(8);
-                dividerlayout.topToBottom=R.id.vi_suma;
-                dividerlayout.startToStart=parentId;
-                dividerlayout.endToEnd=parentId;
-                dividerlayout.bottomToTop=R.id.button14;
-                View divider = findViewById(R.id.divider2);
-                divider.setLayoutParams(dividerlayout);
-
-                ConstraintLayout.LayoutParams veci = new ConstraintLayout.LayoutParams((int)(dp_to_px(150)), (int)(dp_to_px(90)));
-                veci.startToStart=R.id.divider;
-                veci.topToTop=parentId;
-                veci.topMargin=dp_to_px(8);
+                ConstraintLayout.LayoutParams veci = (ConstraintLayout.LayoutParams) vi_bodovi.getLayoutParams();
+                ConstraintLayout constraintLayout = findViewById(R.id.cl);
+                ConstraintSet constraintSet = new ConstraintSet();
+                constraintSet.clone(constraintLayout);
+                constraintSet.connect(R.id.button_vi_bodovi,ConstraintSet.END,R.id.gumb_desno_veliki_vi,ConstraintSet.START,0);
+                constraintSet.connect(R.id.button_vi_bodovi,ConstraintSet.START,R.id.gumb_lijevo_veliki_vi,ConstraintSet.END,0);
+                constraintSet.connect(R.id.button_vi_bodovi,ConstraintSet.BOTTOM,R.id.gumb_dolje_veliki,ConstraintSet.TOP,0);
+                constraintSet.connect(R.id.button_vi_bodovi,ConstraintSet.TOP,R.id.gumb_gore_veliki,ConstraintSet.BOTTOM,0);
+                constraintSet.applyTo(constraintLayout);
                 vi_bodovi.setTextColor(Color.WHITE);
-                vi_bodovi.setTextSize(TypedValue.COMPLEX_UNIT_SP, 50);
-                ConstraintLayout.LayoutParams manji = new ConstraintLayout.LayoutParams((int)(dp_to_px(110)), (int)(dp_to_px(75)));
-                manji.bottomToBottom=R.id.button_vi_bodovi;
-                manji.endToEnd=R.id.divider;
-                manji.topToTop=R.id.button_vi_bodovi;
-                manji.rightMargin=dp_to_px(24);
+                vi_bodovi.setTextSize(TypedValue.COMPLEX_UNIT_SP, (float) (55*scaleh));
+
+                ConstraintLayout.LayoutParams manji = (ConstraintLayout.LayoutParams) mi_bodovi.getLayoutParams();
+                constraintLayout = findViewById(R.id.cl);
+                constraintSet = new ConstraintSet();
+                constraintSet.clone(constraintLayout);
+                constraintSet.connect(R.id.button_mi_bodovi,ConstraintSet.END,R.id.gumb_desno_mali_mi,ConstraintSet.START,0);
+                constraintSet.connect(R.id.button_mi_bodovi,ConstraintSet.START,R.id.gumb_lijevo_mali_mi,ConstraintSet.END,0);
+                constraintSet.connect(R.id.button_mi_bodovi,ConstraintSet.BOTTOM,R.id.gumb_dolje_mali,ConstraintSet.TOP,0);
+                constraintSet.connect(R.id.button_mi_bodovi,ConstraintSet.TOP,R.id.gumb_gore_mali,ConstraintSet.BOTTOM,0);
+                constraintSet.applyTo(constraintLayout);
                 mi_bodovi.setTextColor(Color.rgb(16,65,104));
-                mi_bodovi.setTextSize(TypedValue.COMPLEX_UNIT_SP, 35);
+                mi_bodovi.setTextSize(TypedValue.COMPLEX_UNIT_SP, (float) (35*scaleh));
+
+                ConstraintLayout.LayoutParams mizvanja = (ConstraintLayout.LayoutParams) mi_zvanja.getLayoutParams();
+                mizvanja.startToStart=R.id.gumb_lijevo_mali_mi;
+                mizvanja.topToTop=R.id.gumb_dolje_mali;
+
+                ConstraintLayout.LayoutParams vizvanja = (ConstraintLayout.LayoutParams) vi_zvanja.getLayoutParams();
+                vizvanja.startToStart=R.id.gumb_lijevo_veliki_vi;
+                vizvanja.topToTop=R.id.gumb_dolje_veliki;
+
+                ConstraintLayout.LayoutParams misuma = (ConstraintLayout.LayoutParams) mi_suma.getLayoutParams();
+                misuma.endToStart=R.id.gumb_desno_mali_mi;
+                misuma.topToTop=R.id.gumb_dolje_mali;
+
+                ConstraintLayout.LayoutParams visuma = (ConstraintLayout.LayoutParams) vi_suma.getLayoutParams();
+                visuma.endToStart=R.id.gumb_desno_veliki_vi;
+                visuma.topToTop=R.id.gumb_dolje_veliki;
+
+                mi_zvanja.setLayoutParams(mizvanja);
+                vi_zvanja.setLayoutParams(vizvanja);
+                mi_suma.setLayoutParams(misuma);
+                vi_suma.setLayoutParams(visuma);
+                veci.width = ConstraintLayout.LayoutParams.MATCH_PARENT;
+                veci.height = ConstraintLayout.LayoutParams.MATCH_PARENT;
+                manji.width = ConstraintLayout.LayoutParams.MATCH_PARENT;
+                manji.height = ConstraintLayout.LayoutParams.MATCH_PARENT;
+                veci.constrainedHeight = true;
+                veci.constrainedWidth = true;
+                manji.constrainedHeight = true;
+                manji.constrainedWidth = true;
                 vi_bodovi.setLayoutParams(veci);
                 mi_bodovi.setLayoutParams(manji);
-                Button[] array = new Button[]{mi_bodovi, vi_bodovi};
-                for (int i=0; i < array.length; i++){
-                    ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) array[i].getLayoutParams();
-                    params.height *= scaleh;
-                    params.width *= scalew;
-                    params.topMargin *= scaleh;
-                    params.bottomMargin *= scaleh;
-                    params.rightMargin *= scalew;
-                    params.leftMargin *= scalew;
-                    array[i].setLayoutParams(params);
-                }
             }
         });
         ponisti.setOnClickListener(new View.OnClickListener() {
@@ -639,19 +749,26 @@ public class SecondActivity extends AppCompatActivity {
                 if (!zvali[0]) {
                     mi_zvali.setBackgroundColor(Color.parseColor("#2196F3"));
                     vi_zvali.setBackgroundColor(color_text1);
+                    mi_zvali_counter[0] = 0;
+                    vi_zvali_counter[0] = -1;
                     zvali[0] = true;
                     zvali[1] = false;
                 }
                 else if(zvali[0] && zvali[1]){
                     mi_zvali.setBackgroundColor(Color.parseColor("#2196F3"));
                     vi_zvali.setBackgroundColor(color_text1);
+                    mi_zvali_counter[0] = 0;
+                    vi_zvali_counter[0] = -1;
                     zvali[0] = true;
                     zvali[1] = false;
                 }
                 else if(zvali[0] && !zvali[1]){
-                    mi_zvali.setBackgroundColor(color_text1);
+                    mi_zvali.setBackgroundColor(Color.parseColor("#2196F3"));
                     vi_zvali.setBackgroundColor(color_text1);
-                    zvali[0] = false;
+                    mi_zvali_counter[0] += 1;
+                    mi_zvali_counter[0] = mi_zvali_counter[0] %5;
+                    vi_zvali_counter[0] = -1;
+                    zvali[0] = true;
                     zvali[1] = false;
                 }
                 izracunaj();
@@ -663,24 +780,90 @@ public class SecondActivity extends AppCompatActivity {
                 if (!zvali[0]) {
                     mi_zvali.setBackgroundColor(color_text1);
                     vi_zvali.setBackgroundColor(Color.parseColor("#F42414"));
+                    mi_zvali_counter[0] = -1;
+                    vi_zvali_counter[0] = 0;
                     zvali[0] = true;
                     zvali[1] = true;
                 }
                 else if(zvali[0] && !zvali[1]){
                     mi_zvali.setBackgroundColor(color_text1);
                     vi_zvali.setBackgroundColor(Color.parseColor("#F42414"));
+                    mi_zvali_counter[0] = -1;
+                    vi_zvali_counter[0] = 0;
                     zvali[0] = true;
                     zvali[1] = true;
                 }
                 else if(zvali[0] && zvali[1]){
                     mi_zvali.setBackgroundColor(color_text1);
-                    vi_zvali.setBackgroundColor(color_text1);
-                    zvali[0] = false;
-                    zvali[1] = false;
+                    vi_zvali.setBackgroundColor(Color.parseColor("#F42414"));
+                    vi_zvali_counter[0] += 1;
+                    vi_zvali_counter[0] = vi_zvali_counter[0] %5;
+                    mi_zvali_counter[0] = -1;
+                    zvali[0] = true;
+                    zvali[1] = true;
                 }
                 izracunaj();
             }
         };
+        View.OnLongClickListener zvali_dugo = new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                if((zvali[0] && !zvali[1])||(zvali[0] && zvali[1])){
+                    mi_zvali.setBackgroundColor(color_text1);
+                    vi_zvali.setBackgroundColor(color_text1);
+                    mi_zvali_counter[0] = -1;
+                    vi_zvali_counter[0] = -1;
+                    zvali[0] = false;
+                    zvali[1] = false;
+                }
+                izracunaj();
+                return true;
+            }
+        };
+        View.OnLongClickListener vidi_score = new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                cl2.setBackgroundColor(color_back);
+                cl2.setVisibility(View.VISIBLE);
+                Integer zbroj_mi = 0;
+                Integer zbroj_vi = 0;
+                for (int i = 0; i < IgraAdapter.localDataSet.size(); i++) {
+                    zbroj_mi += Integer.parseInt(IgraAdapter.localDataSet.get(i).mi_suma);
+                    zbroj_vi += Integer.parseInt(IgraAdapter.localDataSet.get(i).vi_suma);
+                }
+                if (text_mi1 != null && text_vi1 != null) {
+                    text_mi1.setText(String.valueOf(zbroj_mi));
+                    text_vi1.setText(String.valueOf(zbroj_vi));
+                    if (zbroj_mi > zbroj_vi) {
+                        text_mi1.setTextColor(Color.parseColor("#2196F3"));
+                        text_vi1.setTextColor(color_text);
+                    }
+                    if (zbroj_vi > zbroj_mi) {
+                        text_vi1.setTextColor(Color.parseColor("#F42414"));
+                        text_mi1.setTextColor(color_text);
+                    }
+                    if (zbroj_vi.equals(zbroj_mi)) {
+                        text_mi1.setTextColor(color_text);
+                        text_vi1.setTextColor(color_text);
+                    }
+                }
+                mi_badge1.setText(String.valueOf(pobjede_mi));
+                vi_badge1.setText(String.valueOf(pobjede_vi));
+                razlika1.setText(String.valueOf(Math.abs(zbroj_mi-zbroj_vi)));
+                razlika_mi1.setText(String.valueOf(Math.abs(kraj-zbroj_mi)));
+                razlika_vi1.setText(String.valueOf(Math.abs(kraj-zbroj_vi)));
+                return true;
+            }
+        };
+        mi_bodovi.setOnLongClickListener(vidi_score);
+        vi_bodovi.setOnLongClickListener(vidi_score);
+        View.OnClickListener sakrij_score = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                cl2.setVisibility(View.GONE);
+            }
+        };
+        cl2.setOnClickListener(sakrij_score);
         View.OnLongClickListener b = new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
@@ -1217,10 +1400,38 @@ public class SecondActivity extends AppCompatActivity {
         stiglja_button.setOnClickListener(a);
         vi_zvali.setOnClickListener(d);
         mi_zvali.setOnClickListener(c);
+        mi_zvali.setOnLongClickListener(zvali_dugo);
+        vi_zvali.setOnLongClickListener(zvali_dugo);
+        edit = extras.getInt("EDIT");
+        Button unesi = findViewById(R.id.button19);
+        Log.d("TAG", "onCreate: "+edit);
+        if ((FirstFragment.pregled && edit != -1) || (MainActivity.live_bool && edit != -1)){
+            unesi.setEnabled(false);
+            unesi.setBackgroundColor(Color.parseColor("#6C6C6C"));
+            unesi.setTextColor(Color.parseColor("#3A3A3A"));
+            ponisti.setText("IZAĐI");
+        }
         findViewById(R.id.button19).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view){
                 if (!(String.valueOf(mi_bodovi.getText()).equals("0") && String.valueOf(vi_bodovi.getText()).equals("0"))) {
+                    FirstFragment.pregled = false;
+                    String datumi = Game_chooser.readFromFile_datum_promijenjeno(view.getContext()).trim();
+                    String[] datumi1 = datumi.split("\\n");
+                    StringBuilder output = new StringBuilder();
+                    for(int i = 0; i < adapter.localDataSet.size(); i++){
+                        String s = "01/01/1970 00:00\n";
+                        if (i==MainActivity.newString){
+                            DateFormat dateFormat = new SimpleDateFormat("dd/MM/yy HH:mm");
+                            Date date = new Date();
+                            s = dateFormat.format(date)+"\n";
+                        }else {
+                            s = datumi1[i]+"\n";
+                        }
+                        output.append(s);
+                    }
+                    writeToFile_datum_promijenjeno(output.toString(), view.getContext());
+                    adapter.notifyDataSetChanged();
                     izracunaj();
                     if (edit == -1) {
                         if (dosao_iz_pobjede){
@@ -1233,13 +1444,13 @@ public class SecondActivity extends AppCompatActivity {
                         if (FirstFragment.dijeli != -1) {
                             FirstFragment.dijeli += 1;
                         }
-                        Igre igra = new Igre(pali, zvali, stiglja, broj_zvanje_20_mi, broj_zvanje_20_vi, broj_zvanje_50_mi, broj_zvanje_50_vi, broj_zvanje_100_mi, broj_zvanje_100_vi, broj_zvanje_150_mi, broj_zvanje_150_vi, broj_zvanje_200_mi, broj_zvanje_200_vi, mi_zvanja.getText().subSequence(1, mi_zvanja.getText().length()), vi_zvanja.getText().subSequence(1, vi_zvanja.getText().length()), mi_bodovi.getText(), vi_bodovi.getText(), mi_suma.getText().subSequence(2, mi_suma.getText().length()), vi_suma.getText().subSequence(2, vi_suma.getText().length()));
+                        Igre igra = new Igre(pali, zvali, stiglja, broj_zvanje_20_mi, broj_zvanje_20_vi, broj_zvanje_50_mi, broj_zvanje_50_vi, broj_zvanje_100_mi, broj_zvanje_100_vi, broj_zvanje_150_mi, broj_zvanje_150_vi, broj_zvanje_200_mi, broj_zvanje_200_vi, mi_zvanja.getText().subSequence(1, mi_zvanja.getText().length()), vi_zvanja.getText().subSequence(1, vi_zvanja.getText().length()), mi_bodovi.getText(), vi_bodovi.getText(), mi_suma.getText().subSequence(2, mi_suma.getText().length()), vi_suma.getText().subSequence(2, vi_suma.getText().length()), (new Integer(mi_zvali_counter[0])).toString(), (new Integer(vi_zvali_counter[0])).toString());
                         FirstFragment.igre.add(igra);
                         Log.d("bug", String.valueOf(IgraAdapter.localDataSet.size() - 1));
                         igradapter.notifyItemInserted(IgraAdapter.localDataSet.size() - 1);
                         finish();
                     } else {
-                        Igre igra = new Igre(pali, zvali, stiglja, broj_zvanje_20_mi, broj_zvanje_20_vi, broj_zvanje_50_mi, broj_zvanje_50_vi, broj_zvanje_100_mi, broj_zvanje_100_vi, broj_zvanje_150_mi, broj_zvanje_150_vi, broj_zvanje_200_mi, broj_zvanje_200_vi, mi_zvanja.getText().subSequence(1, mi_zvanja.getText().length()), vi_zvanja.getText().subSequence(1, vi_zvanja.getText().length()), mi_bodovi.getText(), vi_bodovi.getText(), mi_suma.getText().subSequence(2, mi_suma.getText().length()), vi_suma.getText().subSequence(2, vi_suma.getText().length()));
+                        Igre igra = new Igre(pali, zvali, stiglja, broj_zvanje_20_mi, broj_zvanje_20_vi, broj_zvanje_50_mi, broj_zvanje_50_vi, broj_zvanje_100_mi, broj_zvanje_100_vi, broj_zvanje_150_mi, broj_zvanje_150_vi, broj_zvanje_200_mi, broj_zvanje_200_vi, mi_zvanja.getText().subSequence(1, mi_zvanja.getText().length()), vi_zvanja.getText().subSequence(1, vi_zvanja.getText().length()), mi_bodovi.getText(), vi_bodovi.getText(), mi_suma.getText().subSequence(2, mi_suma.getText().length()), vi_suma.getText().subSequence(2, vi_suma.getText().length()), (new Integer(mi_zvali_counter[0])).toString(), (new Integer(vi_zvali_counter[0])).toString());
                         FirstFragment.igre.set(edit, igra);
                         igradapter.notifyItemChanged(edit, igra);
                         finish();
@@ -1247,19 +1458,175 @@ public class SecondActivity extends AppCompatActivity {
                 }
             }
         });
-        Log.d("aaaaaaaaaaaa", String.valueOf(scalew));
-        Log.d("aaaaaaaaaaaa", String.valueOf(scaleh));
-        Button[] array = new Button[]{ponisti, jedan, dva, tri, cetiri, pet, sest, sedam, osam, devet, nula, brisanje, zvanje_20_button, zvanje_50_button, zvanje_100_button, zvanje_150_button, zvanje_200_button, mi_zvali, vi_zvali, stiglja_button, x, findViewById(R.id.button19)};
-        for (int i=0; i < array.length; i++){
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) array[i].getLayoutParams();
-            params.height *= scaleh;
-            params.width *= scalew;
-            params.topMargin *= scaleh;
-            params.bottomMargin *= scaleh;
-            params.rightMargin *= scalew;
-            params.leftMargin *= scalew;
-            array[i].setLayoutParams(params);
+
+        ArrayList<View> views1 = show_children(findViewById(R.id.cl));
+        for (int i=0; i < views1.size(); i++){
+            if (views1.get(i).getId()!=findViewById(R.id.cl2).getId()){
+                views1.get(i).setScaleX(scalew.floatValue());
+                views1.get(i).setScaleY(scaleh.floatValue());
+                ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) views1.get(i).getLayoutParams();
+                params.setMargins((int)(params.leftMargin*(scalew)),
+                        (int)(params.topMargin*(scaleh)),
+                        (int)(params.rightMargin*(scalew)),
+                        (int)(params.bottomMargin*(scaleh)));
+                if (views1.get(i).getId()==mi_zvanja.getId()){
+                    params.startToStart=R.id.button_mi_bodovi;
+                    params.topToBottom=R.id.button_mi_bodovi;
+                }
+                if (views1.get(i).getId()==vi_zvanja.getId()){
+                    params.startToStart=R.id.button_vi_bodovi;
+                    params.topToBottom=R.id.button_vi_bodovi;
+                }
+                if (views1.get(i).getId()==mi_suma.getId()){
+                    params.endToEnd=R.id.button_mi_bodovi;
+                    params.topToBottom=R.id.button_mi_bodovi;
+                }
+                if (views1.get(i).getId()==vi_suma.getId()){
+                    params.endToEnd=R.id.button_vi_bodovi;
+                    params.topToBottom=R.id.button_vi_bodovi;
+                }
+                views1.get(i).setLayoutParams(params);
+                views1.get(i).invalidate();
+                views1.get(i).requestLayout();
+            }
+        }
+        if (Objects.equals(newString, "VI")){
+            fokus[0] = 1;
+            int parentId = ((View) vi_bodovi.getParent()).getId();
+
+            ConstraintLayout.LayoutParams veci = (ConstraintLayout.LayoutParams) vi_bodovi.getLayoutParams();
+            ConstraintLayout constraintLayout = findViewById(R.id.cl);
+            ConstraintSet constraintSet = new ConstraintSet();
+            constraintSet.clone(constraintLayout);
+            constraintSet.connect(R.id.button_vi_bodovi,ConstraintSet.END,R.id.gumb_desno_veliki_vi,ConstraintSet.START,0);
+            constraintSet.connect(R.id.button_vi_bodovi,ConstraintSet.START,R.id.gumb_lijevo_veliki_vi,ConstraintSet.END,0);
+            constraintSet.connect(R.id.button_vi_bodovi,ConstraintSet.BOTTOM,R.id.gumb_dolje_veliki,ConstraintSet.TOP,0);
+            constraintSet.connect(R.id.button_vi_bodovi,ConstraintSet.TOP,R.id.gumb_gore_veliki,ConstraintSet.BOTTOM,0);
+            constraintSet.applyTo(constraintLayout);
+            vi_bodovi.setTextColor(Color.WHITE);
+            vi_bodovi.setTextSize(TypedValue.COMPLEX_UNIT_SP, (float) (55*scaleh));
+
+            ConstraintLayout.LayoutParams manji = (ConstraintLayout.LayoutParams) mi_bodovi.getLayoutParams();
+            constraintLayout = findViewById(R.id.cl);
+            constraintSet = new ConstraintSet();
+            constraintSet.clone(constraintLayout);
+            constraintSet.connect(R.id.button_mi_bodovi,ConstraintSet.END,R.id.gumb_desno_mali_mi,ConstraintSet.START,0);
+            constraintSet.connect(R.id.button_mi_bodovi,ConstraintSet.START,R.id.gumb_lijevo_mali_mi,ConstraintSet.END,0);
+            constraintSet.connect(R.id.button_mi_bodovi,ConstraintSet.BOTTOM,R.id.gumb_dolje_mali,ConstraintSet.TOP,0);
+            constraintSet.connect(R.id.button_mi_bodovi,ConstraintSet.TOP,R.id.gumb_gore_mali,ConstraintSet.BOTTOM,0);
+            constraintSet.applyTo(constraintLayout);
+            mi_bodovi.setTextColor(Color.rgb(16,65,104));
+            mi_bodovi.setTextSize(TypedValue.COMPLEX_UNIT_SP, (float) (35*scaleh));
+
+            ConstraintLayout.LayoutParams mizvanja = (ConstraintLayout.LayoutParams) mi_zvanja.getLayoutParams();
+            mizvanja.startToStart=R.id.gumb_lijevo_mali_mi;
+            mizvanja.topToTop=R.id.gumb_dolje_mali;
+
+            ConstraintLayout.LayoutParams vizvanja = (ConstraintLayout.LayoutParams) vi_zvanja.getLayoutParams();
+            vizvanja.startToStart=R.id.gumb_lijevo_veliki_vi;
+            vizvanja.topToTop=R.id.gumb_dolje_veliki;
+
+            ConstraintLayout.LayoutParams misuma = (ConstraintLayout.LayoutParams) mi_suma.getLayoutParams();
+            misuma.endToStart=R.id.gumb_desno_mali_mi;
+            misuma.topToTop=R.id.gumb_dolje_mali;
+
+            ConstraintLayout.LayoutParams visuma = (ConstraintLayout.LayoutParams) vi_suma.getLayoutParams();
+            visuma.endToStart=R.id.gumb_desno_veliki_vi;
+            visuma.topToTop=R.id.gumb_dolje_veliki;
+
+            mi_zvanja.setLayoutParams(mizvanja);
+            vi_zvanja.setLayoutParams(vizvanja);
+            mi_suma.setLayoutParams(misuma);
+            vi_suma.setLayoutParams(visuma);
+            veci.width = ConstraintLayout.LayoutParams.MATCH_PARENT;
+            veci.height = ConstraintLayout.LayoutParams.MATCH_PARENT;
+            manji.width = ConstraintLayout.LayoutParams.MATCH_PARENT;
+            manji.height = ConstraintLayout.LayoutParams.MATCH_PARENT;
+            veci.constrainedHeight = true;
+            veci.constrainedWidth = true;
+            manji.constrainedHeight = true;
+            manji.constrainedWidth = true;
+            vi_bodovi.setLayoutParams(veci);
+            mi_bodovi.setLayoutParams(manji);
+        }
+        else{
+            fokus[0] = 0;
+            int parentId = ((View) mi_bodovi.getParent()).getId();
+
+            ConstraintLayout.LayoutParams veci = (ConstraintLayout.LayoutParams) mi_bodovi.getLayoutParams();
+            ConstraintLayout constraintLayout = findViewById(R.id.cl);
+            ConstraintSet constraintSet = new ConstraintSet();
+            constraintSet.clone(constraintLayout);
+            constraintSet.connect(R.id.button_mi_bodovi,ConstraintSet.END,R.id.gumb_desno_veliki_mi,ConstraintSet.START,0);
+            constraintSet.connect(R.id.button_mi_bodovi,ConstraintSet.START,R.id.gumb_lijevo_veliki_mi,ConstraintSet.END,0);
+            constraintSet.connect(R.id.button_mi_bodovi,ConstraintSet.BOTTOM,R.id.gumb_dolje_veliki,ConstraintSet.TOP,0);
+            constraintSet.connect(R.id.button_mi_bodovi,ConstraintSet.TOP,R.id.gumb_gore_veliki,ConstraintSet.BOTTOM,0);
+            constraintSet.applyTo(constraintLayout);
+            mi_bodovi.setTextColor(Color.WHITE);
+            mi_bodovi.setTextSize(TypedValue.COMPLEX_UNIT_SP, (float) (55*scaleh));
+
+
+            ConstraintLayout.LayoutParams manji = (ConstraintLayout.LayoutParams) vi_bodovi.getLayoutParams();
+            constraintLayout = findViewById(R.id.cl);
+            constraintSet = new ConstraintSet();
+            constraintSet.clone(constraintLayout);
+            constraintSet.connect(R.id.button_vi_bodovi,ConstraintSet.END,R.id.gumb_desno_mali_vi,ConstraintSet.START,0);
+            constraintSet.connect(R.id.button_vi_bodovi,ConstraintSet.START,R.id.gumb_lijevo_mali_vi,ConstraintSet.END,0);
+            constraintSet.connect(R.id.button_vi_bodovi,ConstraintSet.BOTTOM,R.id.gumb_dolje_mali,ConstraintSet.TOP,0);
+            constraintSet.connect(R.id.button_vi_bodovi,ConstraintSet.TOP,R.id.gumb_gore_mali,ConstraintSet.BOTTOM,0);
+            constraintSet.applyTo(constraintLayout);
+            vi_bodovi.setTextColor(Color.parseColor("#680E07"));
+            vi_bodovi.setTextSize(TypedValue.COMPLEX_UNIT_SP, (float) (35*scaleh));
+
+            ConstraintLayout.LayoutParams mizvanja = (ConstraintLayout.LayoutParams) mi_zvanja.getLayoutParams();
+            mizvanja.startToStart=R.id.gumb_lijevo_veliki_mi;
+            mizvanja.topToTop=R.id.gumb_dolje_veliki;
+
+            ConstraintLayout.LayoutParams vizvanja = (ConstraintLayout.LayoutParams) vi_zvanja.getLayoutParams();
+            vizvanja.startToStart=R.id.gumb_lijevo_mali_vi;
+            vizvanja.topToTop=R.id.gumb_dolje_mali;
+
+            ConstraintLayout.LayoutParams misuma = (ConstraintLayout.LayoutParams) mi_suma.getLayoutParams();
+            misuma.endToStart=R.id.gumb_desno_veliki_mi;
+            misuma.topToTop=R.id.gumb_dolje_veliki;
+
+            ConstraintLayout.LayoutParams visuma = (ConstraintLayout.LayoutParams) vi_suma.getLayoutParams();
+            visuma.endToStart=R.id.gumb_desno_mali_vi;
+            visuma.topToTop=R.id.gumb_dolje_mali;
+
+            mi_zvanja.setLayoutParams(mizvanja);
+            vi_zvanja.setLayoutParams(vizvanja);
+            mi_suma.setLayoutParams(misuma);
+            vi_suma.setLayoutParams(visuma);
+            mi_bodovi.setLayoutParams(veci);
+            vi_bodovi.setLayoutParams(manji);
         }
         izracunaj();
+    }
+    @Override
+    public void onBackPressed(){
+        if (cl2.getVisibility()==View.VISIBLE){
+            cl2.setVisibility(View.GONE);
+        }
+        else{
+            finish();
+        }
+    }
+    private ArrayList<View> show_children(View v) {
+        ArrayList<View> views = new ArrayList<>();
+        ViewGroup viewgroup=(ViewGroup)v;
+        for (int i=0;i<viewgroup.getChildCount();i++) {
+            View v1=viewgroup.getChildAt(i);
+            if (v1 instanceof ViewGroup) show_children(v1);
+            Log.d("APPNAME", String.valueOf(mi_bodovi.getId()));
+            if (v1.getId()!=mi_zvanja.getId() && v1.getId()!=vi_zvanja.getId() &&
+                    v1.getId()!=mi_suma.getId() && v1.getId()!=vi_suma.getId() &&
+                    v1.getId()!=mi_bodovi.getId() && v1.getId()!=vi_bodovi.getId()){
+                views.add(v1);
+                Log.d("APPNAMA",String.valueOf(v1.getId()));
+            }
+
+        }
+        return views;
     }
 }

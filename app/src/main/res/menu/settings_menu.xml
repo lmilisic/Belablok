@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="HardcodedText">
+
+    <item
+        android:id="@+id/rename"
+        android:title="Preimenuj partiju" />
+    <item
+        android:id="@+id/kraj"
+        android:title="Promijeni bodovnu granicu" />
+    <item
+        android:id="@+id/pobjede"
+        android:title="Promijeni rezultat pobjeda" />
+</menu>

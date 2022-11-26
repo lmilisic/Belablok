@@ -102,12 +102,56 @@ public class IgraAdapter extends RecyclerView.Adapter<IgraAdapter.ViewHolder> {
         color_text1 = Color.parseColor("#"+Integer.toHexString(color1).substring(2));
         if (localDataSet.get(position).getZvali()[0]){
             if (!localDataSet.get(position).getZvali()[1]){
-                if(!dark){viewHolder.getImageView().setImageResource(R.mipmap.mi);}else{viewHolder.getImageView().setImageResource(R.mipmap.mi_dark_foreground);}
-                viewHolder.getImageView().setVisibility(View.VISIBLE);
+                if(localDataSet.get(position).getMi_suma_counter()==-1){
+                    if(!dark){viewHolder.getImageView().setImageResource(R.mipmap.mi);}else{viewHolder.getImageView().setImageResource(R.mipmap.mi_dark_foreground);}
+                    viewHolder.getImageView().setVisibility(View.VISIBLE);
+                }
+                if(localDataSet.get(position).getMi_suma_counter()==0){
+                    if(!dark){viewHolder.getImageView().setImageResource(R.mipmap.mi);}else{viewHolder.getImageView().setImageResource(R.mipmap.mi_dark_foreground);}
+                    viewHolder.getImageView().setVisibility(View.VISIBLE);
+                }
+                if(localDataSet.get(position).getMi_suma_counter()==1){
+                    viewHolder.getImageView().setImageResource(R.mipmap.herc_plavi_foreground);
+                    viewHolder.getImageView().setVisibility(View.VISIBLE);
+                }
+                if(localDataSet.get(position).getMi_suma_counter()==2){
+                    viewHolder.getImageView().setImageResource(R.mipmap.karo_plavi_foreground);
+                    viewHolder.getImageView().setVisibility(View.VISIBLE);
+                }
+                if(localDataSet.get(position).getMi_suma_counter()==3){
+                    viewHolder.getImageView().setImageResource(R.mipmap.pik_plavi_foreground);
+                    viewHolder.getImageView().setVisibility(View.VISIBLE);
+                }
+                if(localDataSet.get(position).getMi_suma_counter()==4){
+                    viewHolder.getImageView().setImageResource(R.mipmap.tref_plavi_foreground);
+                    viewHolder.getImageView().setVisibility(View.VISIBLE);
+                }
             }
             if (localDataSet.get(position).getZvali()[1]){
-                if(!dark){viewHolder.getImageView().setImageResource(R.mipmap.vi);}else{viewHolder.getImageView().setImageResource(R.mipmap.vi_dark_foreground);}
-                viewHolder.getImageView().setVisibility(View.VISIBLE);
+                if(localDataSet.get(position).getVi_suma_counter()==-1){
+                    if(!dark){viewHolder.getImageView().setImageResource(R.mipmap.vi);}else{viewHolder.getImageView().setImageResource(R.mipmap.vi_dark_foreground);}
+                    viewHolder.getImageView().setVisibility(View.VISIBLE);
+                }
+                if(localDataSet.get(position).getVi_suma_counter()==0){
+                    if(!dark){viewHolder.getImageView().setImageResource(R.mipmap.vi);}else{viewHolder.getImageView().setImageResource(R.mipmap.vi_dark_foreground);}
+                    viewHolder.getImageView().setVisibility(View.VISIBLE);
+                }
+                if(localDataSet.get(position).getVi_suma_counter()==1){
+                    viewHolder.getImageView().setImageResource(R.mipmap.herc_crveni_foreground);
+                    viewHolder.getImageView().setVisibility(View.VISIBLE);
+                }
+                if(localDataSet.get(position).getVi_suma_counter()==2){
+                    viewHolder.getImageView().setImageResource(R.mipmap.karo_crveni_foreground);
+                    viewHolder.getImageView().setVisibility(View.VISIBLE);
+                }
+                if(localDataSet.get(position).getVi_suma_counter()==3){
+                    viewHolder.getImageView().setImageResource(R.mipmap.pik_crveni_foreground);
+                    viewHolder.getImageView().setVisibility(View.VISIBLE);
+                }
+                if(localDataSet.get(position).getVi_suma_counter()==4){
+                    viewHolder.getImageView().setImageResource(R.mipmap.tref_crveni_foreground);
+                    viewHolder.getImageView().setVisibility(View.VISIBLE);
+                }
             }
         }
         if (!localDataSet.get(position).getZvali()[0]){
@@ -130,6 +174,10 @@ public class IgraAdapter extends RecyclerView.Adapter<IgraAdapter.ViewHolder> {
         }
         if (vi_int>mi_int){
             viewHolder.vigetTextView().setTextColor(Color.parseColor("#F42414"));
+            viewHolder.migetTextView().setTextColor(color_text);
+        }
+        if (vi_int.equals(mi_int)){
+            viewHolder.vigetTextView().setTextColor(color_text);
             viewHolder.migetTextView().setTextColor(color_text);
         }
     }

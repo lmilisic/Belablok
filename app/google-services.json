@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1081655920702",
+    "project_id": "belablok-27e78",
+    "storage_bucket": "belablok-27e78.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1081655920702:android:3c51e02415708c52a7296f",
+        "android_client_info": {
+          "package_name": "com.mioc.belablok"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1081655920702-052l9rif43he0n0bspqgugg9o9s1bstf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_gsovssKfQznf2X6I0GfWHiFump7AewM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1081655920702-052l9rif43he0n0bspqgugg9o9s1bstf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

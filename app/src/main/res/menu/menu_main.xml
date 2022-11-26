@@ -5,7 +5,7 @@
 
     <item
         android:id="@+id/izbrisi"
-        android:title="Izbriši igre" />
+        android:title="Izbriši sve" />
     <item
         android:id="@+id/export_game"
         android:title="Izvezi igru u QR" />
@@ -15,4 +15,10 @@
     <item
         android:id="@+id/switch_team"
         android:title="Promijeni ekipe" />
+    <item
+        android:id="@+id/export_game_to_file"
+        android:title="Izvezi igru u datoteku" />
+    <!--<item
+        android:id="@+id/begin_live"
+        android:title="Pokreni prijenos uživo" />!-->
 </menu>

@@ -16,6 +16,7 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">#000000</item>
         <!-- Customize your theme here. -->
+        <item name="android:navigationBarColor">@color/black</item>
     </style>
     <style name="ThemeOverlay.Actionbar" parent="Theme.MaterialComponents.DayNight.DarkActionBar" >
         <item name="android:textColorPrimary">#FFFFFF</item>

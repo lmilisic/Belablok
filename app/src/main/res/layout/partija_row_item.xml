@@ -3,18 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="175dp">
+    android:layout_height="180dp">
 
     <TextView
         android:id="@+id/do_kolko_partija"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"
         android:text="1001"
         android:textColor="?android:textColorPrimary"
+        app:layout_constraintBottom_toBottomOf="@+id/partija_vi_malo"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <View
         android:id="@+id/divider12"
@@ -28,18 +28,40 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
+        android:id="@+id/date_created"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="-50dp"
+        android:gravity="bottom"
+        android:rotation="-90"
+        android:text="04/12/22 23:24"
+        app:layout_constraintBottom_toBottomOf="@+id/partija_mi_malo"
+        app:layout_constraintStart_toStartOf="@+id/divider13"
+        app:layout_constraintTop_toTopOf="@+id/partija_mi" />
+
+    <TextView
+        android:id="@+id/date_changed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="-50dp"
+        android:gravity="bottom"
+        android:rotation="-90"
+        android:text="04/12/22 00:00"
+        app:layout_constraintBottom_toBottomOf="@+id/partija_vi_malo"
+        app:layout_constraintEnd_toEndOf="@+id/divider13"
+        app:layout_constraintTop_toTopOf="@+id/partija_vi" />
+
+    <TextView
         android:id="@+id/partija_mi"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
         android:text="0"
         android:textColor="?android:textColorPrimary"
         android:textSize="60sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/partija_mi_malo"
         app:layout_constraintEnd_toStartOf="@+id/divider12"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/do_kolko_partija" />
+        app:layout_constraintStart_toStartOf="@+id/divider13"
+        app:layout_constraintTop_toBottomOf="@+id/ime_partije" />
 
     <TextView
         android:id="@+id/partija_mi_malo"
@@ -49,9 +71,8 @@
         android:textColor="?android:textColorPrimary"
         android:textSize="34sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/divider12"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/divider13"
         app:layout_constraintTop_toBottomOf="@+id/partija_mi" />
 
     <TextView
@@ -62,10 +83,9 @@
         android:textColor="?android:textColorPrimary"
         android:textSize="60sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/partija_vi_malo"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/divider13"
         app:layout_constraintStart_toEndOf="@+id/divider12"
-        app:layout_constraintTop_toBottomOf="@+id/do_kolko_partija" />
+        app:layout_constraintTop_toBottomOf="@+id/ime_partije" />
 
     <TextView
         android:id="@+id/partija_vi_malo"
@@ -75,8 +95,53 @@
         android:textColor="?android:textColorPrimary"
         android:textSize="34sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/divider13"
         app:layout_constraintStart_toEndOf="@+id/divider12"
         app:layout_constraintTop_toBottomOf="@+id/partija_vi" />
+
+    <View
+        android:id="@+id/divider13"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="?android:attr/listDivider"
+        android:backgroundTint="#606060"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/do_kolko_partija" />
+
+    <TextView
+        android:id="@+id/ime_partije"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="25dp"
+        android:layout_marginEnd="25dp"
+        android:ellipsize="end"
+        android:gravity="center|center_horizontal|center_vertical"
+        android:maxLines="1"
+        android:text="Bezimena partija"
+        android:textAllCaps="false"
+        android:textColor="?android:textColorPrimary"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/button25"
+        app:layout_constraintEnd_toEndOf="@+id/button25"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/button25" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button25"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="43dp"
+        android:layout_height="wrap_content"
+        android:background="@null"
+        android:backgroundTint="@color/zxing_transparent"
+        android:minWidth="0dp"
+        app:icon="@drawable/ic_baseline_more_vert_24"
+        app:iconPadding="0dp"
+        app:iconTint="?attr/colorPrimaryVariant"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

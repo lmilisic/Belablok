@@ -3,6 +3,7 @@ package com.mioc.belablok;
 import static android.content.ContentValues.TAG;
 import static android.content.Context.MIDI_SERVICE;
 import static com.google.android.material.badge.BadgeUtils.attachBadgeDrawable;
+import static com.mioc.belablok.MainActivity.live_bool;
 import static com.mioc.belablok.MainActivity.newString;
 import static com.mioc.belablok.MainActivity.save;
 
@@ -78,6 +79,7 @@ public class FirstFragment extends Fragment {
     static TextView mi_sve_pali;
     static TextView vi_sve_pali;
     Button ponisti;
+    Button pregledaj;
     static ScrollView sv;
     static ImageView djelitelj;
     static ImageView imageView4;
@@ -90,6 +92,12 @@ public class FirstFragment extends Fragment {
     public static Integer kraj = 1001;
     public static Integer pobjede_mi = 0;
     public static Integer pobjede_vi = 0;
+    public static boolean pregled = false;
+    private View text_mi_naziv;
+    private View text_vi_naziv;
+    public static TextView live_indicator;
+    private static Button mi;
+    private static Button vi;
 
     public static String shared_prefs(){
         String contents = "";
@@ -138,16 +146,26 @@ public class FirstFragment extends Fragment {
         recyclerView.setAdapter(igradapter);
         return binding.getRoot();
     }
+    public void vratiIzPregleda() {
+        if (pregled){
+            recyclerView.setVisibility(View.INVISIBLE);
+            sv.setVisibility(View.VISIBLE);
+            pregled = false;
+            Resume();
+        }
+    }
     static Boolean dark = false;
     @SuppressLint("UnsafeOptInUsageError")
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         text_mi = view.findViewById(R.id.textview_mi_bodovi);
         text_vi = view.findViewById(R.id.textview_vi_bodovi);
+        text_mi_naziv = view.findViewById(R.id.textview_mi);
+        text_vi_naziv = view.findViewById(R.id.textview_vi);
         razlika = view.findViewById(R.id.razlika);
         razlika_mi = view.findViewById(R.id.razlika_mi);
         razlika_vi = view.findViewById(R.id.razlika_vi);
-        Button mi = view.findViewById(R.id.button_mi);
+        mi = view.findViewById(R.id.button_mi);
         mi_badge = view.findViewById(R.id.textView17);
         vi_badge = view.findViewById(R.id.textView18);
         pobjeda = view.findViewById(R.id.textView4);
@@ -161,8 +179,11 @@ public class FirstFragment extends Fragment {
         mi_sve_pali = view.findViewById(R.id.textView3);
         vi_sve_pali = view.findViewById(R.id.textView6);
         ponisti = view.findViewById(R.id.button24);
+        pregledaj = view.findViewById(R.id.button23);
         djelitelj = view.findViewById(R.id.imageView2);
         imageView4 = view.findViewById(R.id.imageView4);
+        live_indicator = view.findViewById(R.id.live_indicator);
+        pregled = false;
         switch (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) {
             case Configuration.UI_MODE_NIGHT_YES:
                 dark = true;
@@ -186,7 +207,7 @@ public class FirstFragment extends Fragment {
                 getActivity().startActivity(intent);
             }
         });
-        Button vi = view.findViewById(R.id.button_vi);
+        vi = view.findViewById(R.id.button_vi);
         vi.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -221,6 +242,14 @@ public class FirstFragment extends Fragment {
                 Resume();
             }
         });
+        pregledaj.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                recyclerView.setVisibility(View.VISIBLE);
+                sv.setVisibility(View.GONE);
+                pregled = true;
+            }
+        });
         djelitelj.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -233,6 +262,7 @@ public class FirstFragment extends Fragment {
                 if (dijeli==2){if(!dark){djelitelj.setImageResource(R.mipmap.selected_2);}else{djelitelj.setImageResource(R.mipmap.selected_2_dark_foreground);}}
                 if (dijeli==3){if(!dark){djelitelj.setImageResource(R.mipmap.selected_3);}else{djelitelj.setImageResource(R.mipmap.selected_3_dark_foreground);}}
                 save(igre, pobjedaa, pobjednik, dijeli_prosli, dijeli, kraj, pobjede_mi, pobjede_vi);
+                Resume();
             }
         });
         djelitelj.setOnLongClickListener(new View.OnLongClickListener() {
@@ -241,17 +271,40 @@ public class FirstFragment extends Fragment {
                 dijeli = -1;
                 if (dijeli==-1){if(!dark){djelitelj.setImageResource(R.mipmap.selected_no);}else{djelitelj.setImageResource(R.mipmap.selected_no_dark_foreground);}}
                 save(igre, pobjedaa, pobjednik, dijeli_prosli, dijeli, kraj, pobjede_mi, pobjede_vi);
+                Resume();
                 return true;
             }
         });
         if (MainActivity.newString!=null){
-            String rezultat = Game_chooser.adapter.localDataSet.get(MainActivity.newString).igra;
-            rezultat = rezultat.substring(6, rezultat.length());
-            byte[] decodedBytes = Base64.getDecoder().decode(rezultat);
-            String decodedString = new String(decodedBytes);
-            Log.d("TAG11111111111111111", "onCreate: "+rezultat);
-            uvezi(decodedString);
+            if (!live_bool){
+                String rezultat = Game_chooser.adapter.localDataSet.get(MainActivity.newString).igra;
+                rezultat = rezultat.substring(6, rezultat.length());
+                byte[] decodedBytes = Base64.getDecoder().decode(rezultat);
+                String decodedString = new String(decodedBytes);
+                uvezi(decodedString);
+            }else{
+                String rezultat = LiveMatchesAdapter.localDataSet.get(MainActivity.newString).igra;
+                rezultat = rezultat.substring(6, rezultat.length());
+                byte[] decodedBytes = Base64.getDecoder().decode(rezultat);
+                String decodedString = new String(decodedBytes);
+                uvezi(decodedString);
+            }
         }
+        View.OnClickListener vratiizpregleda = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                vratiIzPregleda();
+            }
+        };
+        text_vi.setOnClickListener(vratiizpregleda);
+        text_mi.setOnClickListener(vratiizpregleda);
+        razlika_mi.setOnClickListener(vratiizpregleda);
+        razlika_vi.setOnClickListener(vratiizpregleda);
+        razlika.setOnClickListener(vratiizpregleda);
+        mi_badge.setOnClickListener(vratiizpregleda);
+        vi_badge.setOnClickListener(vratiizpregleda);
+        text_mi_naziv.setOnClickListener(vratiizpregleda);
+        text_vi_naziv.setOnClickListener(vratiizpregleda);
         Resume();
     }
     Integer last = 0;
@@ -284,21 +337,29 @@ public class FirstFragment extends Fragment {
     }
     @SuppressLint({"CommitPrefEdits", "NotifyDataSetChanged"})
     public static void Resume(){
+        if (Game_chooser.id_mog_live_matcha!=-1){
+            live_indicator.setVisibility(View.VISIBLE);
+        }else{
+            live_indicator.setVisibility(View.INVISIBLE);
+        }
+        if (MainActivity.live_bool){
+            mi.setVisibility(View.INVISIBLE);
+            vi.setVisibility(View.INVISIBLE);
+        }else{
+            mi.setVisibility(View.VISIBLE);
+            vi.setVisibility(View.VISIBLE);
+        }
         save(igre, pobjedaa, pobjednik, dijeli_prosli, dijeli, kraj, pobjede_mi, pobjede_vi);
-        Log.d("aaa", "resume");
-        Log.d("aaa", String.valueOf(igradapter.getItemCount()));
         IgraAdapter.localDataSet = igre;
         Integer zbroj_mi = 0;
         Integer zbroj_vi = 0;
         qr = Base64.getEncoder().encodeToString(shared_prefs().getBytes());
-        Log.d("TAG111", "Resume: "+MainActivity.newString);
-        if (MainActivity.newString!=null){
+        if (MainActivity.newString!=null && !live_bool){
             Game_chooser.adapter.localDataSet.set(MainActivity.newString, new Partije("belot!"+qr));
             String partije_edit = "";
             for (Partije partija : Game_chooser.adapter.localDataSet){
                 partije_edit += "|"+partija.igra;
             }
-            Log.d("TAG", "Resume: "+partije_edit);
             Game_chooser.writeToFile(partije_edit, recyclerView.getContext());
             Game_chooser.adapter.notifyItemChanged(MainActivity.newString);
         }
@@ -323,28 +384,28 @@ public class FirstFragment extends Fragment {
             }
         }
         if (!pobjedaa){
-            if (zbroj_mi >= kraj && zbroj_vi <= kraj) {
+            if (zbroj_mi >= kraj && zbroj_vi < kraj) {
                 pobjede_mi += 1;
-                pobjeda.setText("MI su pobijedili");
+                pobjeda.setText("Pobijedili smo");
                 pobjeda.setTextColor(Color.parseColor("#2196F3"));
                 pobjedaa = true;
                 pobjednik = false;
-            } else if (zbroj_vi >= kraj && zbroj_mi <= kraj) {
+            } else if (zbroj_vi >= kraj && zbroj_mi < kraj) {
                 pobjede_vi += 1;
-                pobjeda.setText("VI su pobijedili");
+                pobjeda.setText("Pobijedili su");
                 pobjeda.setTextColor(Color.parseColor("#F42414"));
                 pobjedaa = true;
                 pobjednik = true;
             } else if (zbroj_vi >= kraj && zbroj_mi >= kraj) {
                 if (zbroj_vi > zbroj_mi) {
                     pobjede_vi += 1;
-                    pobjeda.setText("VI su pobijedili");
+                    pobjeda.setText("Pobijedili su");
                     pobjeda.setTextColor(Color.parseColor("#F42414"));
                     pobjedaa = true;
                     pobjednik = true;
                 } else if (zbroj_mi < zbroj_vi) {
                     pobjede_mi += 1;
-                    pobjeda.setText("MI su pobijedili");
+                    pobjeda.setText("Pobijedili smo");
                     pobjeda.setTextColor(Color.parseColor("#2196F3"));
                     pobjedaa = true;
                     pobjednik = false;
@@ -352,14 +413,14 @@ public class FirstFragment extends Fragment {
                     if (IgraAdapter.localDataSet.get(IgraAdapter.localDataSet.size() - 1).getZvali()[0] == true) {
                         if (IgraAdapter.localDataSet.get(IgraAdapter.localDataSet.size() - 1).getZvali()[1] == false) {
                             pobjede_mi += 1;
-                            pobjeda.setText("MI su pobijedili");
+                            pobjeda.setText("Pobijedili smo");
                             pobjeda.setTextColor(Color.parseColor("#2196F3"));
                             pobjedaa = true;
                             pobjednik = false;
                         }
                         if (IgraAdapter.localDataSet.get(IgraAdapter.localDataSet.size() - 1).getZvali()[1] == true) {
                             pobjede_vi += 1;
-                            pobjeda.setText("VI su pobijedili");
+                            pobjeda.setText("Pobijedili su");
                             pobjeda.setTextColor(Color.parseColor("#F42414"));
                             pobjedaa = true;
                             pobjednik = true;
@@ -367,14 +428,14 @@ public class FirstFragment extends Fragment {
                     } else {
                         if (Integer.parseInt(IgraAdapter.localDataSet.get(IgraAdapter.localDataSet.size() - 1).mi_suma) > Integer.parseInt(IgraAdapter.localDataSet.get(IgraAdapter.localDataSet.size() - 1).vi_suma)) {
                             pobjede_mi += 1;
-                            pobjeda.setText("MI su pobijedili");
+                            pobjeda.setText("Pobijedili smo");
                             pobjeda.setTextColor(Color.parseColor("#2196F3"));
                             pobjedaa = true;
                             pobjednik = false;
                         }
                         if (Integer.parseInt(IgraAdapter.localDataSet.get(IgraAdapter.localDataSet.size() - 1).mi_suma) < Integer.parseInt(IgraAdapter.localDataSet.get(IgraAdapter.localDataSet.size() - 1).vi_suma)) {
                             pobjede_vi += 1;
-                            pobjeda.setText("VI su pobijedili");
+                            pobjeda.setText("Pobijedili su");
                             pobjeda.setTextColor(Color.parseColor("#F42414"));
                             pobjedaa = true;
                             pobjednik = true;
@@ -382,9 +443,38 @@ public class FirstFragment extends Fragment {
                     }
                 }
             }
-
+            if (pobjedaa){
+                dijeli = dijeli%4;
+                if (dijeli<=-1){dijeli_prosli = -1;}
+                if (dijeli==3){dijeli_prosli = 2;}
+                if (dijeli==2){dijeli_prosli = 1;}
+                if (dijeli==1){dijeli_prosli = 0;}
+                if (dijeli==0){dijeli_prosli = 3;}
+                dijeli = -1;
+            }
         }
         if (pobjedaa){
+            if (Math.max(zbroj_mi, zbroj_vi)>=kraj) {
+                if (!pobjednik) {
+                    pobjeda.setText("Pobijedili smo");
+                    pobjeda.setTextColor(Color.parseColor("#2196F3"));
+                    pobjednik = false;
+                } else {
+                    pobjeda.setText("Pobijedili su");
+                    pobjeda.setTextColor(Color.parseColor("#F42414"));
+                    pobjednik = true;
+                }
+            }else{
+                if (!pobjednik) {
+                    pobjede_mi -= 1;
+                } else {
+                    pobjede_vi -= 1;
+                }
+                pobjedaa = false;
+                pobjednik = false;
+            }
+        }
+        if (pobjedaa && !pregled){
             recyclerView.setVisibility(View.INVISIBLE);
             sv.setVisibility(View.VISIBLE);
             mi_sve_suma.setText(String.valueOf(zbroj_mi));
@@ -431,19 +521,12 @@ public class FirstFragment extends Fragment {
             }
             mi_sve_pali.setText(String.valueOf(zbroj_mi_pali));
             vi_sve_pali.setText(String.valueOf(zbroj_vi_pali));
-            dijeli = dijeli%4;
-            if (dijeli<=-1){dijeli_prosli = -1;}
-            if (dijeli==3){dijeli_prosli = 2;}
-            if (dijeli==2){dijeli_prosli = 1;}
-            if (dijeli==1){dijeli_prosli = 0;}
-            if (dijeli==0){dijeli_prosli = 3;}
-            dijeli = -1;
         }
         mi_badge.setText(String.valueOf(pobjede_mi));
         vi_badge.setText(String.valueOf(pobjede_vi));
         razlika.setText(String.valueOf(Math.abs(zbroj_mi-zbroj_vi)));
-        razlika_mi.setText(String.valueOf(Math.abs(1001-zbroj_mi)));
-        razlika_vi.setText(String.valueOf(Math.abs(1001-zbroj_vi)));
+        razlika_mi.setText(String.valueOf(Math.abs(kraj-zbroj_mi)));
+        razlika_vi.setText(String.valueOf(Math.abs(kraj-zbroj_vi)));
         dijeli = dijeli%4;
         if (dijeli<=-1){if(!dark){djelitelj.setImageResource(R.mipmap.selected_no);}else{djelitelj.setImageResource(R.mipmap.selected_no_dark_foreground);}}
         if (dijeli==0){if(!dark){djelitelj.setImageResource(R.mipmap.selected_0);}else{djelitelj.setImageResource(R.mipmap.selected_0_dark_foreground);}}
@@ -452,7 +535,7 @@ public class FirstFragment extends Fragment {
         if (dijeli==3){if(!dark){djelitelj.setImageResource(R.mipmap.selected_3);}else{djelitelj.setImageResource(R.mipmap.selected_3_dark_foreground);}}
         recyclerView.scrollToPosition(igre.size() - 1);
         qr = Base64.getEncoder().encodeToString(shared_prefs().getBytes());
-        if (MainActivity.newString!=null){
+        if (MainActivity.newString!=null && !live_bool){
             Game_chooser.adapter.localDataSet.set(MainActivity.newString, new Partije("belot!"+qr));
             String partije_edit = "";
             for (Partije partija : Game_chooser.adapter.localDataSet){

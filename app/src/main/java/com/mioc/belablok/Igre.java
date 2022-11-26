@@ -1,6 +1,8 @@
 package com.mioc.belablok;
 
 public class Igre {
+    private Integer vi_suma_counter = -1;
+    private Integer mi_suma_counter = -1;
     private Boolean[] pali;
     private Boolean[] zvali;
     private Boolean[] stiglja;
@@ -21,7 +23,7 @@ public class Igre {
     String mi_suma;
     String vi_suma;
 
-    public Igre(Boolean[] new_pali, Boolean[] new_zvali, Boolean[] new_stiglja, Integer broj_zvanje_20_mi, Integer broj_zvanje_20_vi, Integer broj_zvanje_50_mi, Integer broj_zvanje_50_vi, Integer broj_zvanje_100_mi, Integer broj_zvanje_100_vi, Integer broj_zvanje_150_mi, Integer broj_zvanje_150_vi, Integer broj_zvanje_200_mi, Integer broj_zvanje_200_vi, String mi_zvanje, String vi_zvanje, String mi_bodovi, String vi_bodovi, String mi_suma, String vi_suma) {
+    public Igre(Boolean[] new_pali, Boolean[] new_zvali, Boolean[] new_stiglja, Integer broj_zvanje_20_mi, Integer broj_zvanje_20_vi, Integer broj_zvanje_50_mi, Integer broj_zvanje_50_vi, Integer broj_zvanje_100_mi, Integer broj_zvanje_100_vi, Integer broj_zvanje_150_mi, Integer broj_zvanje_150_vi, Integer broj_zvanje_200_mi, Integer broj_zvanje_200_vi, String mi_zvanje, String vi_zvanje, String mi_bodovi, String vi_bodovi, String mi_suma, String vi_suma, Integer mi_suma_counter, Integer vi_suma_counter) {
         this.pali = new_pali;
         this.zvali = new_zvali;
         this.stiglja = new_stiglja;
@@ -41,7 +43,12 @@ public class Igre {
         this.vi_bodovi = vi_bodovi;
         this.mi_suma = mi_suma;
         this.vi_suma = vi_suma;
+        this.mi_suma_counter = mi_suma_counter;
+        this.vi_suma_counter = vi_suma_counter;
     }
+    public Integer getVi_suma_counter() {return vi_suma_counter;}
+
+    public Integer getMi_suma_counter() {return mi_suma_counter;}
 
     public Boolean[] getPali() {
         return pali;
@@ -136,7 +143,7 @@ public class Igre {
         }
     }
 
-    public Igre(Boolean[] pali, Boolean[] zvali, Boolean[] stiglja, Integer[] broj_zvanje_20_mi, Integer[] broj_zvanje_20_vi, Integer[] broj_zvanje_50_mi, Integer[] broj_zvanje_50_vi, Integer[] broj_zvanje_100_mi, Integer[] broj_zvanje_100_vi, Integer[] broj_zvanje_150_mi, Integer[] broj_zvanje_150_vi, Integer[] broj_zvanje_200_mi, Integer[] broj_zvanje_200_vi, CharSequence subSequence, CharSequence subSequence1, CharSequence text, CharSequence text1, CharSequence subSequence2, CharSequence subSequence3) {
+    public Igre(Boolean[] pali, Boolean[] zvali, Boolean[] stiglja, Integer[] broj_zvanje_20_mi, Integer[] broj_zvanje_20_vi, Integer[] broj_zvanje_50_mi, Integer[] broj_zvanje_50_vi, Integer[] broj_zvanje_100_mi, Integer[] broj_zvanje_100_vi, Integer[] broj_zvanje_150_mi, Integer[] broj_zvanje_150_vi, Integer[] broj_zvanje_200_mi, Integer[] broj_zvanje_200_vi, CharSequence subSequence, CharSequence subSequence1, CharSequence text, CharSequence text1, CharSequence subSequence2, CharSequence subSequence3, CharSequence subSequence4, CharSequence subSequence5) {
         this.pali = pali;
         this.zvali = zvali;
         this.stiglja = stiglja;
@@ -156,5 +163,7 @@ public class Igre {
         this.vi_bodovi = (String) text1;
         this.mi_suma = (String) subSequence2;
         this.vi_suma = (String) subSequence3;
+        this.mi_suma_counter = Integer.parseInt((String) subSequence4);
+        this.vi_suma_counter = Integer.parseInt((String) subSequence5);
     }
 }

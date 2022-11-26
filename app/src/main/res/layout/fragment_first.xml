@@ -179,7 +179,7 @@
                 android:layout_height="wrap_content"
                 android:paddingTop="10dp"
                 android:paddingBottom="10dp"
-                android:text="MI su pobjedili"
+                android:text="Pobijedili smo"
                 android:textColor="#2196F3"
                 android:textSize="34sp"
                 android:textStyle="bold" />
@@ -392,9 +392,18 @@
 
             <Button
                 android:id="@+id/button24"
+                android:textColor="?attr/colorPrimaryVariant"
+                android:backgroundTint="?attr/colorOnPrimary"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Poništi zadnju rundu"
+                android:text="Poništi zadnju rundu"/>
+
+            <Button
+                android:id="@+id/button23"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="?attr/colorOnPrimary"
+                android:text="Pregledaj partije"
                 android:textColor="?attr/colorPrimaryVariant" />
 
         </LinearLayout>
@@ -430,10 +439,10 @@
         android:id="@+id/imageView2"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        app:layout_constraintEnd_toStartOf="@+id/textView18"
-        app:layout_constraintStart_toEndOf="@+id/textView17"
-        app:layout_constraintTop_toTopOf="parent"
-        android:src="@mipmap/selected_no" />
+        android:src="@mipmap/selected_no"
+        app:layout_constraintEnd_toEndOf="@+id/live_indicator"
+        app:layout_constraintStart_toStartOf="@+id/live_indicator"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/imageView4"
@@ -445,5 +454,19 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/live_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="• UŽIVO"
+        android:textColor="#D80000"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/razlika"
+        app:layout_constraintEnd_toEndOf="@+id/divider4"
+        app:layout_constraintStart_toStartOf="@+id/divider4"
+        app:layout_constraintTop_toBottomOf="@+id/imageView2" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
