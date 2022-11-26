@@ -16,6 +16,8 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 
+import com.github.javiersantos.appupdater.AppUpdater;
+import com.github.javiersantos.appupdater.enums.UpdateFrom;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.BufferedReader;
@@ -71,6 +73,10 @@ public class Game_chooser extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
             }
         });
+        AppUpdater appUpdater = new AppUpdater(this)
+                .setUpdateFrom(UpdateFrom.JSON)
+                .setUpdateJSON("https://evaluator.ddns.net/update.json").setCancelable(false);
+        appUpdater.start();
     }
     @Override
     protected void onResume() {

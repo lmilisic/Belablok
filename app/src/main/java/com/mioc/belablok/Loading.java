@@ -13,6 +13,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.TypedValue;
 
+import com.github.javiersantos.appupdater.AppUpdater;
+import com.github.javiersantos.appupdater.enums.UpdateFrom;
+
 public class Loading extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
